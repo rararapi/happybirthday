@@ -1,4 +1,4 @@
-function encryptName() {
+function generateURL() {
   // 入力された名前を取得
   var name = document.getElementById("name").value;
   
@@ -15,6 +15,8 @@ function encryptName() {
   // Base64URLエンコード
   var base64UrlEncoded = base64Encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   
-  // 暗号化された名前を表示
-  document.getElementById("encryptedName").textContent = base64UrlEncoded;
+  // 暗号化された名前付与したURLを表示
+  var url = window.location.origin + "/?n_enc=" + base64UrlEncoded;
+  var link = "<a href='" + url + "'>" + url + "</a>";
+  document.getElementById("encryptedURL").innerHTML = link;
 }
