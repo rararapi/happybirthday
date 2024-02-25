@@ -16,5 +16,5 @@ function encryptName() {
   var base64UrlEncoded = base64Encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   
   // 暗号化された名前を表示
-  document.getElementById("encryptedName").textContent = "Encrypted Name: " + base64UrlEncoded;
+  document.getElementById("encryptedName").textContent = base64UrlEncoded;
 }
