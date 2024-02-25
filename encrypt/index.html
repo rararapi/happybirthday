@@ -11,10 +11,23 @@
     <div class="container">
         <h1>Encryption Page</h1>
         <label for="name">Name:</label>
-        <input type="text" id="name" placeholder="Enter your name">
+        <input type="text" id="name" placeholder="birthday person's name">
         <button onclick="encryptName()">Encrypt</button>
         <p id="encryptedName"></p>
+        <button onclick="copyToClipboard()">Copy</button>
     </div>
 
+    <script>
+        function copyToClipboard() {
+            var encryptedName = document.getElementById("encryptedName");
+            var range = document.createRange();
+            range.selectNode(encryptedName);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand("copy");
+            window.getSelection().removeAllRanges();
+            alert("Copied the text: " + encryptedName.textContent);
+        }
+    </script>
 </body>
 </html>
