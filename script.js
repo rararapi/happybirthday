@@ -762,4 +762,24 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         showMessage('👈👉 画面をスワイプしてみて！');
     }, 10000);
+
+    // ヒントボタンのトグル
+    const hintButton = document.getElementById('hintButton');
+    const touchHints = document.getElementById('touchHints');
+    let hintsVisible = false;
+
+    hintButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hintsVisible = !hintsVisible;
+
+        if (hintsVisible) {
+            touchHints.classList.add('visible');
+            hintButton.textContent = '❌ 閉じる';
+        } else {
+            touchHints.classList.remove('visible');
+            hintButton.textContent = '💡 ヒント';
+        }
+
+        vibrate(30);
+    });
 });

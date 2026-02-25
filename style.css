@@ -215,18 +215,61 @@ h1 {
     }
 }
 
+/* ヒントボタン */
+.hint-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.3s;
+    animation: hintButtonPulse 2s ease-in-out infinite;
+}
+
+.hint-button:active {
+    transform: scale(0.95);
+}
+
+@keyframes hintButtonPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+}
+
 /* タッチヒント（スマホ用） */
 .touch-hints {
     position: fixed;
-    bottom: 10px;
+    bottom: 80px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(20px);
     display: flex;
     flex-direction: column;
     gap: 8px;
     z-index: 10000;
     width: 90%;
     max-width: 400px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s ease-out;
+}
+
+.touch-hints.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
 }
 
 .hint-item {
@@ -542,8 +585,15 @@ h1 {
         border-radius: 25px;
     }
 
+    .hint-button {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
     .touch-hints {
-        bottom: 10px;
+        bottom: 70px;
         gap: 5px;
     }
 
@@ -568,23 +618,36 @@ h1 {
         height: 20px;
     }
 
+    .hint-button {
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+
     .hint-item {
-        font-size: 11px;
-        padding: 8px 12px;
+        font-size: 9px;
+        padding: 5px 10px;
     }
 }
 
 /* 横画面対応 */
 @media only screen and (orientation: landscape) and (max-height: 500px) {
+    .hint-button {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+
     .touch-hints {
         flex-direction: row;
         flex-wrap: wrap;
-        bottom: 5px;
+        bottom: 50px;
+        max-width: 90%;
     }
 
     .hint-item {
-        font-size: 10px;
-        padding: 6px 10px;
+        font-size: 9px;
+        padding: 5px 8px;
         flex: 1 1 45%;
     }
 
