@@ -1,3 +1,150 @@
+// 実績システム
+const ACHIEVEMENTS = {
+    first_tap: { id: 'first_tap', name: '🎆 はじめの一歩', desc: '初めてタップした', icon: '👆' },
+    first_swipe: { id: 'first_swipe', name: '🌊 スワイプマスター', desc: '初めてスワイプした', icon: '👈' },
+    first_candle: { id: 'first_candle', name: '🕯️ 火消し職人', desc: 'ろうそくを1本消した', icon: '💨' },
+    all_candles: { id: 'all_candles', name: '🎂 完璧な祝福', desc: 'すべてのろうそくを消した', icon: '✨' },
+    double_tap: { id: 'double_tap', name: '⏰ 時間の魔術師', desc: 'ダブルタップで時間停止', icon: '🔮' },
+    long_press: { id: 'long_press', name: '🌈 虹の創造主', desc: '長押しで虹色花火', icon: '🎨' },
+    multi_touch: { id: 'multi_touch', name: '🖐️ 多指使い', desc: '複数指でタップ', icon: '✋' },
+    secret_command: { id: 'secret_command', name: '🎮 コナミマスター', desc: '隠しコマンド発動', icon: '🏆' },
+    shake_master: { id: 'shake_master', name: '📱 シェイカー', desc: 'スマホを振った', icon: '💫' },
+    tilt_master: { id: 'tilt_master', name: '🎢 傾けマスター', desc: 'スマホを大きく傾けた', icon: '🎪' },
+    combo_3: { id: 'combo_3', name: '⚡ コンボ初級', desc: '3コンボ達成', icon: '⚡' },
+    combo_5: { id: 'combo_5', name: '⚡⚡ コンボ中級', desc: '5コンボ達成', icon: '⭐' },
+    combo_10: { id: 'combo_10', name: '⚡⚡⚡ コンボ上級', desc: '10コンボ達成', icon: '🔥' },
+    tap_10: { id: 'tap_10', name: '👆 タップ好き', desc: '10回タップ', icon: '👍' },
+    tap_50: { id: 'tap_50', name: '👆👆 タップマニア', desc: '50回タップ', icon: '💪' },
+    tap_100: { id: 'tap_100', name: '👆👆👆 タップの鉄人', desc: '100回タップ', icon: '🏅' },
+    firework_100: { id: 'firework_100', name: '🎆 花火師見習い', desc: '花火100発', icon: '🎇' },
+    firework_500: { id: 'firework_500', name: '🎆🎆 花火師', desc: '花火500発', icon: '🎆' },
+    confetti_10: { id: 'confetti_10', name: '🎊 紙吹雪好き', desc: '紙吹雪10回', icon: '🎉' },
+    surprise_encounter: { id: 'surprise_encounter', name: '🎁 ラッキー', desc: 'ランダムサプライズ遭遇', icon: '🍀' },
+    gift_opened: { id: 'gift_opened', name: '🎁 プレゼント開封', desc: 'ギフトボックスを開けた', icon: '🎀' },
+    play_1min: { id: 'play_1min', name: '⏱️ お試し', desc: '1分間プレイ', icon: '⌚' },
+    play_5min: { id: 'play_5min', name: '⏱️⏱️ じっくり', desc: '5分間プレイ', icon: '🕐' },
+    all_swipes: { id: 'all_swipes', name: '🧭 四方八方', desc: '全方向スワイプ制覇', icon: '🌐' },
+    explorer: { id: 'explorer', name: '🗺️ 探検家', desc: '10種類以上の実績解除', icon: '🔍' },
+    master: { id: 'master', name: '👑 パーティーマスター', desc: '20種類以上の実績解除', icon: '👑' }
+};
+
+let achievementStats = {
+    tapCount: 0,
+    swipeCount: 0,
+    fireworkCount: 0,
+    confettiCount: 0,
+    candlesBlown: 0,
+    swipeDirections: new Set(),
+    startTime: Date.now(),
+    unlockedAchievements: []
+};
+
+// localStorageから読み込み
+function loadAchievements() {
+    const saved = localStorage.getItem('birthday_achievements');
+    if (saved) {
+        const data = JSON.parse(saved);
+        achievementStats = { ...achievementStats, ...data };
+        achievementStats.swipeDirections = new Set(data.swipeDirections || []);
+        achievementStats.startTime = Date.now(); // 新しいセッション
+    }
+}
+
+// localStorageに保存
+function saveAchievements() {
+    const data = {
+        ...achievementStats,
+        swipeDirections: Array.from(achievementStats.swipeDirections)
+    };
+    localStorage.setItem('birthday_achievements', JSON.stringify(data));
+}
+
+// 実績解除チェック
+function checkAchievement(achievementId) {
+    if (achievementStats.unlockedAchievements.includes(achievementId)) {
+        return false; // 既に解除済み
+    }
+
+    achievementStats.unlockedAchievements.push(achievementId);
+    saveAchievements();
+    showAchievementNotification(achievementId);
+    return true;
+}
+
+// 実績解除通知
+function showAchievementNotification(achievementId) {
+    const achievement = ACHIEVEMENTS[achievementId];
+    if (!achievement) return;
+
+    const notification = document.createElement('div');
+    notification.className = 'achievement-notification';
+    notification.innerHTML = `
+        <div class="achievement-icon">${achievement.icon}</div>
+        <div class="achievement-content">
+            <div class="achievement-title">実績解除！</div>
+            <div class="achievement-name">${achievement.name}</div>
+            <div class="achievement-desc">${achievement.desc}</div>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => notification.classList.add('show'), 100);
+
+    vibrate([100, 50, 100, 50, 100]);
+
+    // 花火エフェクト
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight * 0.5;
+            createFirework(x, y);
+        }, i * 200);
+    }
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 500);
+    }, 4000);
+}
+
+// 統計更新と実績チェック
+function updateStats(stat, value = 1) {
+    achievementStats[stat] += value;
+
+    // 実績チェック
+    if (stat === 'tapCount') {
+        if (achievementStats.tapCount === 1) checkAchievement('first_tap');
+        if (achievementStats.tapCount === 10) checkAchievement('tap_10');
+        if (achievementStats.tapCount === 50) checkAchievement('tap_50');
+        if (achievementStats.tapCount === 100) checkAchievement('tap_100');
+    }
+
+    if (stat === 'swipeCount') {
+        if (achievementStats.swipeCount === 1) checkAchievement('first_swipe');
+    }
+
+    if (stat === 'fireworkCount') {
+        if (achievementStats.fireworkCount === 100) checkAchievement('firework_100');
+        if (achievementStats.fireworkCount === 500) checkAchievement('firework_500');
+    }
+
+    if (stat === 'confettiCount') {
+        if (achievementStats.confettiCount === 10) checkAchievement('confetti_10');
+    }
+
+    if (stat === 'candlesBlown') {
+        if (achievementStats.candlesBlown === 1) checkAchievement('first_candle');
+    }
+
+    // 探検家・マスター実績
+    const count = achievementStats.unlockedAchievements.length;
+    if (count >= 10) checkAchievement('explorer');
+    if (count >= 20) checkAchievement('master');
+
+    saveAchievements();
+}
+
 // 復号化関数
 function decryptName(encryptedValue) {
   var key = CryptoJS.enc.Utf8.parse('12345678901234567890123456789012');
@@ -46,6 +193,8 @@ function startConfetti() {
       setTimeout(() => confetti.remove(), 5000);
     }, i * 50);
   }
+
+  updateStats('confettiCount');
 }
 
 // バルーンアニメーション
@@ -89,6 +238,8 @@ function createFirework(x, y) {
     container.appendChild(particle);
     setTimeout(() => particle.remove(), 1000);
   }
+
+  updateStats('fireworkCount');
 }
 
 // ランダムに花火を打ち上げ
@@ -137,13 +288,16 @@ function addCombo() {
         createMegaFireworks();
         createMegaFireworks();
         vibrate([100, 50, 100, 50, 100]);
+        checkAchievement('combo_10');
     } else if (comboCount >= 5) {
         showMessage('⚡ COMBO × ' + comboCount + '! ⚡');
         launchFireworks();
         vibrate([50, 50, 50]);
+        checkAchievement('combo_5');
     } else if (comboCount >= 3) {
         showMessage('✨ Combo × ' + comboCount + ' ✨');
         vibrate(30);
+        checkAchievement('combo_3');
     }
 
     comboTimeout = setTimeout(() => {
@@ -195,6 +349,7 @@ function handleDoubleTap(x, y) {
             }, 1000);
             showMessage('⏰ 時間停止！ドーン！ ⏰');
             vibrate([100, 100, 100, 100, 300]);
+            checkAchievement('double_tap');
             tapCount = 0;
         }
     } else {
@@ -239,6 +394,7 @@ function handleOrientation(event) {
         if (!window.tiltEffectCooldown) {
             window.tiltEffectCooldown = true;
             showMessage('🎢 傾きすぎ！ケーキが落ちる～！');
+            checkAchievement('tilt_master');
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => startConfetti(), i * 100);
             }
@@ -271,6 +427,7 @@ function checkSecretCommand(direction) {
 function activateSecretMode() {
     showMessage('🎮 隠しコマンド発動！！！ 🎮');
     vibrate([100, 50, 100, 50, 100, 50, 500]);
+    checkAchievement('secret_command');
 
     // 超豪華エフェクト
     for (let i = 0; i < 50; i++) {
@@ -366,6 +523,7 @@ function blowOutCandles() {
     candles.forEach((candle, index) => {
         setTimeout(() => {
             candle.classList.add('blown');
+            updateStats('candlesBlown');
 
             const allCandles = document.querySelectorAll('.candle');
             const blownCandles = document.querySelectorAll('.candle.blown');
@@ -375,6 +533,7 @@ function blowOutCandles() {
                     showMessage('🎂 おめでとう！全部消えたよ！ 🎉');
                     createMegaFireworks();
                     vibrate([200, 100, 200, 100, 200]);
+                    checkAchievement('all_candles');
                 }, 500);
             }
         }, index * 300);
@@ -445,6 +604,7 @@ function handleSwipeGesture() {
 
     vibrate(50);
     addCombo(); // コンボ追加
+    updateStats('swipeCount');
 
     let direction = '';
 
@@ -480,6 +640,12 @@ function handleSwipeGesture() {
         }
     }
 
+    // スワイプ方向記録
+    achievementStats.swipeDirections.add(direction);
+    if (achievementStats.swipeDirections.size === 4) {
+        checkAchievement('all_swipes');
+    }
+
     // 隠しコマンドチェック
     checkSecretCommand(direction);
 }
@@ -510,6 +676,7 @@ function handleShake(event) {
 function onShakeDetected() {
     showMessage('🎊 シェイクでパーティータイム！ 🎊');
     createMegaFireworks();
+    checkAchievement('shake_master');
 
     // 追加の紙吹雪
     for (let i = 0; i < 3; i++) {
@@ -530,6 +697,7 @@ function setupGiftBox() {
             this.classList.add('opened');
             showMessage('🎁 サプライズ！あなたは最高！ 💖');
             createMegaFireworks();
+            checkAchievement('gift_opened');
 
             // ギフトから紙吹雪が飛び出す
             for (let i = 0; i < 5; i++) {
@@ -609,6 +777,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const touch = e.touches[0];
             createRainbowFirework(touch.clientX, touch.clientY);
             vibrate([100, 50, 100, 50, 100]);
+            checkAchievement('long_press');
         }, 700);
 
         // マルチタッチ検知
@@ -616,6 +785,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clearTimeout(longPressTimer);
             const touchCount = Math.min(e.touches.length, 10);
             showMessage(`🖐️ ${touchCount}本指タッチ！ 🖐️`);
+            checkAchievement('multi_touch');
 
             // 指の本数分だけ花火
             for (let i = 0; i < touchCount; i++) {
@@ -655,6 +825,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 createFirework(touch.clientX, touch.clientY);
                 addCombo();
                 vibrate(30);
+                updateStats('tapCount');
 
                 if (!window.musicPlayed) {
                     playBirthdaySong();
@@ -714,6 +885,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const random = Math.random();
         if (random > 0.95) {
             // 5%の確率でサプライズ
+            checkAchievement('surprise_encounter');
             const surprises = [
                 () => {
                     showMessage('🎁 サプライズ！ランダムギフト！');
@@ -742,6 +914,17 @@ document.addEventListener('DOMContentLoaded', function () {
             vibrate([100, 50, 100, 50, 100]);
         }
     }, 5000);
+
+    // プレイ時間チェック
+    setInterval(() => {
+        const playTime = (Date.now() - achievementStats.startTime) / 1000 / 60; // 分
+        if (playTime >= 1 && !achievementStats.unlockedAchievements.includes('play_1min')) {
+            checkAchievement('play_1min');
+        }
+        if (playTime >= 5 && !achievementStats.unlockedAchievements.includes('play_5min')) {
+            checkAchievement('play_5min');
+        }
+    }, 10000); // 10秒ごとにチェック
 
     // ギフトボックスのセットアップ
     setupGiftBox();
@@ -782,4 +965,58 @@ document.addEventListener('DOMContentLoaded', function () {
 
         vibrate(30);
     });
+
+    // 実績ボタンのトグル
+    const achievementButton = document.getElementById('achievementButton');
+    const achievementModal = document.getElementById('achievementModal');
+
+    achievementButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showAchievementList();
+        vibrate(30);
+    });
+
+    // 実績モーダルを閉じる
+    document.getElementById('closeAchievements').addEventListener('click', function(e) {
+        e.stopPropagation();
+        achievementModal.classList.remove('show');
+        vibrate(20);
+    });
+
+    // 実績リストを読み込み
+    loadAchievements();
 });
+
+// 実績一覧を表示
+function showAchievementList() {
+    const modal = document.getElementById('achievementModal');
+    const container = document.getElementById('achievementsList');
+
+    const totalAchievements = Object.keys(ACHIEVEMENTS).length;
+    const unlockedCount = achievementStats.unlockedAchievements.length;
+
+    container.innerHTML = `
+        <div class="achievement-progress">
+            <div class="progress-text">${unlockedCount} / ${totalAchievements} 実績解除</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${(unlockedCount / totalAchievements * 100)}%"></div>
+            </div>
+        </div>
+    `;
+
+    Object.values(ACHIEVEMENTS).forEach(ach => {
+        const isUnlocked = achievementStats.unlockedAchievements.includes(ach.id);
+        const item = document.createElement('div');
+        item.className = `achievement-list-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+        item.innerHTML = `
+            <div class="achievement-list-icon">${isUnlocked ? ach.icon : '🔒'}</div>
+            <div class="achievement-list-content">
+                <div class="achievement-list-name">${isUnlocked ? ach.name : '???'}</div>
+                <div class="achievement-list-desc">${isUnlocked ? ach.desc : '未解除'}</div>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    modal.classList.add('show');
+}

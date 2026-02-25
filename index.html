@@ -36,6 +36,7 @@
         </div>
     </div>
     <button id="hintButton" class="hint-button">💡 ヒント</button>
+    <button id="achievementButton" class="achievement-button">🏆 実績</button>
     <div id="touchHints" class="touch-hints">
         <div class="hint-item">👆 タップで花火 / 長押しで虹花火</div>
         <div class="hint-item">👆👆 ダブルタップで時間停止</div>
@@ -46,6 +47,15 @@
         <div class="hint-item">🎮 隠しコマンド: ↑↑↓↓←→←→</div>
     </div>
     <div id="messagePopup" class="message-popup"></div>
+
+    <div id="achievementModal" class="achievement-modal">
+        <div class="achievement-modal-content">
+            <button id="closeAchievements" class="close-modal">✕</button>
+            <h2 class="achievement-modal-title">🏆 実績一覧</h2>
+            <div id="achievementsList" class="achievements-list"></div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
