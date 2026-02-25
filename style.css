@@ -220,3 +220,269 @@ body {
         transform: translateX(-50%) scale(1.05);
     }
 }
+
+/* ケーキのろうそく */
+.cake-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.candles-container {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 40px;
+    z-index: 10;
+}
+
+.candle {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.candle:hover {
+    transform: scale(1.1);
+}
+
+.flame {
+    width: 15px;
+    height: 20px;
+    background: linear-gradient(180deg, #ff6b00 0%, #ffeb3b 50%, #fff 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    position: relative;
+    animation: flicker 0.3s infinite alternate;
+    box-shadow: 0 0 20px #ff6b00, 0 0 30px #ffeb3b;
+}
+
+@keyframes flicker {
+    0% { transform: scale(1) translateY(0); }
+    100% { transform: scale(1.05) translateY(-2px); }
+}
+
+.smoke {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.candle.blown .flame {
+    opacity: 0;
+    animation: blowOut 0.3s forwards;
+}
+
+.candle.blown .smoke {
+    opacity: 1;
+    animation: smokeRise 2s forwards;
+}
+
+@keyframes blowOut {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes smokeRise {
+    0% {
+        opacity: 0.8;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px) scale(2);
+    }
+}
+
+.smoke::before {
+    content: '💨';
+    font-size: 20px;
+}
+
+/* メッセージポップアップ */
+.message-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px 50px;
+    border-radius: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.message-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+/* 星の軌跡 */
+.star-trail {
+    position: fixed;
+    font-size: 20px;
+    pointer-events: none;
+    z-index: 9998;
+    animation: starFade 1s ease-out forwards;
+}
+
+@keyframes starFade {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(360deg);
+    }
+}
+
+/* ギフトボックス */
+.gift-box {
+    position: fixed;
+    bottom: 80px;
+    right: 30px;
+    width: 80px;
+    height: 100px;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 100;
+}
+
+.gift-box.show {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    animation: giftBounce 2s infinite;
+}
+
+@keyframes giftBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.gift-body {
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    border-radius: 5px;
+}
+
+.gift-body::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 60px;
+    background: #ffd93d;
+}
+
+.gift-body::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 10px;
+    background: #ffd93d;
+}
+
+.gift-lid {
+    position: absolute;
+    top: 0;
+    width: 80px;
+    height: 30px;
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a3a0 100%);
+    border-radius: 5px 5px 0 0;
+    transition: all 0.5s;
+}
+
+.gift-lid::before {
+    content: '🎀';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+}
+
+.gift-box.opened .gift-lid {
+    transform: translateY(-50px) rotateX(45deg);
+    opacity: 0;
+}
+
+.gift-box.opened .gift-body {
+    animation: giftExplode 0.5s forwards;
+}
+
+@keyframes giftExplode {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.gift-message {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #ff69b4;
+    white-space: nowrap;
+    animation: pulse 1.5s infinite;
+}
+
+/* レスポンシブ対応 */
+@media only screen and (max-width: 600px) {
+    .candles-container {
+        gap: 25px;
+        top: 10%;
+    }
+
+    .flame {
+        width: 12px;
+        height: 16px;
+    }
+
+    .gift-box {
+        bottom: 70px;
+        right: 20px;
+        width: 60px;
+        height: 80px;
+    }
+
+    .gift-body {
+        width: 60px;
+        height: 45px;
+    }
+
+    .gift-lid {
+        width: 60px;
+        height: 25px;
+    }
+
+    .message-popup {
+        padding: 20px 30px;
+        font-size: 18px;
+        max-width: 80%;
+        text-align: center;
+    }
+}

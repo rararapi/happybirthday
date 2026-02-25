@@ -117,6 +117,134 @@ function createSparkles() {
   }, 300);
 }
 
+// ろうそくを吹き消す
+function blowCandles() {
+    const candles = document.querySelectorAll('.candle');
+    let blownCount = 0;
+
+    candles.forEach((candle, index) => {
+        if (!candle.classList.contains('blown')) {
+            setTimeout(() => {
+                candle.classList.add('blown');
+                blownCount++;
+
+                if (blownCount === candles.length) {
+                    setTimeout(() => {
+                        showMessage('🎂 おめでとう！全部消えたよ！ 🎉');
+                        createMegaFireworks();
+                    }, 500);
+                }
+            }, index * 300);
+        }
+    });
+}
+
+// メガ花火
+function createMegaFireworks() {
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight * 0.7;
+            createFirework(x, y);
+        }, i * 200);
+    }
+}
+
+// ランダムメッセージ表示
+const messages = [
+    '🎊 最高の一年になりますように！',
+    '✨ 夢が全部叶いますように！',
+    '🌟 素敵な誕生日をお過ごしください！',
+    '🎈 いつも笑顔でいてね！',
+    '💝 あなたは特別な存在です！',
+    '🎁 今日は主役！楽しんで！',
+    '🌈 幸せがたくさん訪れますように！',
+    '⭐ あなたの笑顔が大好き！'
+];
+
+function showMessage(customMessage) {
+    const popup = document.getElementById('messagePopup');
+    const message = customMessage || messages[Math.floor(Math.random() * messages.length)];
+
+    popup.textContent = message;
+    popup.classList.add('show');
+
+    setTimeout(() => {
+        popup.classList.remove('show');
+    }, 3000);
+}
+
+// マウス追従の星
+function createStarTrail(x, y) {
+    const star = document.createElement('div');
+    star.className = 'star-trail';
+    star.style.left = x + 'px';
+    star.style.top = y + 'px';
+    star.textContent = '⭐';
+    document.body.appendChild(star);
+
+    setTimeout(() => star.remove(), 1000);
+}
+
+// デバイスシェイク検知
+let lastShake = 0;
+let shakeThreshold = 15;
+
+function handleShake(event) {
+    const current = new Date().getTime();
+
+    if (current - lastShake > 1000) {
+        const acceleration = event.accelerationIncludingGravity;
+
+        if (acceleration) {
+            const totalAcceleration = Math.abs(acceleration.x) +
+                                     Math.abs(acceleration.y) +
+                                     Math.abs(acceleration.z);
+
+            if (totalAcceleration > shakeThreshold) {
+                lastShake = current;
+                onShakeDetected();
+            }
+        }
+    }
+}
+
+function onShakeDetected() {
+    showMessage('🎊 シェイクでパーティータイム！ 🎊');
+    createMegaFireworks();
+
+    // 追加の紙吹雪
+    for (let i = 0; i < 3; i++) {
+        setTimeout(startConfetti, i * 500);
+    }
+}
+
+// ギフトボックス
+function setupGiftBox() {
+    const giftBox = document.getElementById('giftBox');
+
+    setTimeout(() => {
+        giftBox.classList.add('show');
+    }, 3000);
+
+    giftBox.addEventListener('click', function() {
+        if (!this.classList.contains('opened')) {
+            this.classList.add('opened');
+            showMessage('🎁 サプライズ！あなたは最高！ 💖');
+            createMegaFireworks();
+
+            // ギフトから紙吹雪が飛び出す
+            for (let i = 0; i < 5; i++) {
+                setTimeout(startConfetti, i * 200);
+            }
+
+            setTimeout(() => {
+                this.style.display = 'none';
+            }, 2000);
+        }
+    });
+}
+
 // 誕生日の歌を再生
 function playBirthdaySong() {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -168,11 +296,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // クリックで花火と音楽
     document.body.addEventListener('click', function(e) {
-        createFirework(e.clientX, e.clientY);
-        if (!window.musicPlayed) {
-            playBirthdaySong();
-            window.musicPlayed = true;
-            setTimeout(() => window.musicPlayed = false, 10000);
+        // ギフトボックスやろうそくのクリックは除外
+        if (!e.target.closest('.gift-box') && !e.target.closest('.candle')) {
+            createFirework(e.clientX, e.clientY);
+            if (!window.musicPlayed) {
+                playBirthdaySong();
+                window.musicPlayed = true;
+                setTimeout(() => window.musicPlayed = false, 10000);
+            }
         }
     });
+
+    // ろうそくクリックイベント
+    document.querySelectorAll('.candle').forEach(candle => {
+        candle.addEventListener('click', function() {
+            if (!this.classList.contains('blown')) {
+                this.classList.add('blown');
+
+                const allCandles = document.querySelectorAll('.candle');
+                const blownCandles = document.querySelectorAll('.candle.blown');
+
+                if (allCandles.length === blownCandles.length) {
+                    setTimeout(() => {
+                        showMessage('🎂 おめでとう！全部消えたよ！ 🎉');
+                        createMegaFireworks();
+                    }, 500);
+                }
+            }
+        });
+    });
+
+    // マウス移動で星の軌跡
+    let mouseTrailEnabled = true;
+    document.addEventListener('mousemove', function(e) {
+        if (mouseTrailEnabled && Math.random() > 0.7) {
+            createStarTrail(e.clientX, e.clientY);
+        }
+    });
+
+    // デバイスシェイク検知
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', handleShake);
+    }
+
+    // ギフトボックスのセットアップ
+    setupGiftBox();
+
+    // 定期的にランダムメッセージ
+    setInterval(() => {
+        if (Math.random() > 0.7) {
+            showMessage();
+        }
+    }, 15000);
+
+    // 5秒後にろうそくのヒントを表示
+    setTimeout(() => {
+        showMessage('🕯️ ろうそくをクリックして消してみてね！');
+    }, 5000);
 });

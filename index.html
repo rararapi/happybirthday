@@ -11,10 +11,32 @@
 <body>
     <div class="container">
         <h1 class="fade-in">Happy Birthday<br><span id="name"></span></h1>
-        <img src="birthday-cake.png" alt="Birthday Cake" class="birthday-cake slide-in">
+        <div class="cake-wrapper">
+            <img src="birthday-cake.png" alt="Birthday Cake" class="birthday-cake slide-in">
+            <div class="candles-container">
+                <div class="candle" data-index="0">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+                <div class="candle" data-index="1">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+                <div class="candle" data-index="2">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+            </div>
+        </div>
         <div id="confettiContainer"></div>
+        <div id="giftBox" class="gift-box">
+            <div class="gift-lid"></div>
+            <div class="gift-body"></div>
+            <div class="gift-message">🎁 タップしてね！</div>
+        </div>
     </div>
-    <div class="click-hint">🎉 クリックで花火と音楽！ 🎵</div>
+    <div class="click-hint">🎉 クリックで花火と音楽！ デバイスをシェイク！ 🎵</div>
+    <div id="messagePopup" class="message-popup"></div>
     <script src="script.js"></script>
 </body>
 </html>
