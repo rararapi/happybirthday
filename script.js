@@ -124,6 +124,180 @@ function vibrate(pattern) {
     }
 }
 
+// コンボシステム
+let comboCount = 0;
+let comboTimeout = null;
+
+function addCombo() {
+    comboCount++;
+    clearTimeout(comboTimeout);
+
+    if (comboCount >= 10) {
+        showMessage('🔥 SUPER COMBO × ' + comboCount + '!!! 🔥');
+        createMegaFireworks();
+        createMegaFireworks();
+        vibrate([100, 50, 100, 50, 100]);
+    } else if (comboCount >= 5) {
+        showMessage('⚡ COMBO × ' + comboCount + '! ⚡');
+        launchFireworks();
+        vibrate([50, 50, 50]);
+    } else if (comboCount >= 3) {
+        showMessage('✨ Combo × ' + comboCount + ' ✨');
+        vibrate(30);
+    }
+
+    comboTimeout = setTimeout(() => {
+        comboCount = 0;
+    }, 2000);
+}
+
+// 虹色花火
+function createRainbowFirework(x, y) {
+    const container = document.getElementById('confettiContainer');
+    const rainbowColors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
+
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'firework-particle rainbow-particle';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.backgroundColor = rainbowColors[i % rainbowColors.length];
+
+        const angle = (Math.PI * 2 * i) / 50;
+        const velocity = 3 + Math.random() * 3;
+        particle.style.setProperty('--tx', Math.cos(angle) * velocity * 100 + 'px');
+        particle.style.setProperty('--ty', Math.sin(angle) * velocity * 100 + 'px');
+
+        container.appendChild(particle);
+        setTimeout(() => particle.remove(), 2000);
+    }
+
+    showMessage('🌈 レインボー花火！ 🌈');
+    vibrate([200, 100, 200]);
+}
+
+// ダブルタップ検知
+let lastTapTime = 0;
+let tapCount = 0;
+
+function handleDoubleTap(x, y) {
+    const now = Date.now();
+    const timeDiff = now - lastTapTime;
+
+    if (timeDiff < 300 && timeDiff > 0) {
+        tapCount++;
+        if (tapCount === 1) {
+            // ダブルタップ
+            timeStopEffect();
+            setTimeout(() => {
+                createMegaFireworks();
+                createMegaFireworks();
+            }, 1000);
+            showMessage('⏰ 時間停止！ドーン！ ⏰');
+            vibrate([100, 100, 100, 100, 300]);
+            tapCount = 0;
+        }
+    } else {
+        tapCount = 0;
+    }
+
+    lastTapTime = now;
+}
+
+// 時間停止エフェクト
+function timeStopEffect() {
+    const body = document.body;
+    body.style.filter = 'grayscale(1)';
+    body.style.transition = 'filter 0.5s';
+
+    setTimeout(() => {
+        body.style.filter = 'grayscale(0)';
+        body.style.transition = 'filter 0.3s';
+    }, 1000);
+}
+
+// 画面傾き検知
+let currentTilt = { x: 0, y: 0 };
+
+function handleOrientation(event) {
+    const beta = event.beta; // 前後の傾き
+    const gamma = event.gamma; // 左右の傾き
+
+    currentTilt.x = gamma;
+    currentTilt.y = beta;
+
+    // ケーキを傾ける
+    const cake = document.querySelector('.cake-wrapper');
+    if (cake) {
+        const tiltX = Math.max(-15, Math.min(15, gamma / 3));
+        const tiltY = Math.max(-15, Math.min(15, beta / 3));
+        cake.style.transform = `rotate(${tiltX}deg)`;
+    }
+
+    // 大きく傾けたら特別エフェクト
+    if (Math.abs(gamma) > 60 || Math.abs(beta) > 60) {
+        if (!window.tiltEffectCooldown) {
+            window.tiltEffectCooldown = true;
+            showMessage('🎢 傾きすぎ！ケーキが落ちる～！');
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => startConfetti(), i * 100);
+            }
+            vibrate([50, 50, 50, 50, 50]);
+
+            setTimeout(() => {
+                window.tiltEffectCooldown = false;
+            }, 3000);
+        }
+    }
+}
+
+// 隠しコマンド（上上下下左右左右）
+let secretCommandSequence = [];
+const secretCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right'];
+
+function checkSecretCommand(direction) {
+    secretCommandSequence.push(direction);
+
+    if (secretCommandSequence.length > secretCode.length) {
+        secretCommandSequence.shift();
+    }
+
+    if (JSON.stringify(secretCommandSequence) === JSON.stringify(secretCode)) {
+        activateSecretMode();
+        secretCommandSequence = [];
+    }
+}
+
+function activateSecretMode() {
+    showMessage('🎮 隠しコマンド発動！！！ 🎮');
+    vibrate([100, 50, 100, 50, 100, 50, 500]);
+
+    // 超豪華エフェクト
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            createRainbowFirework(x, y);
+        }, i * 100);
+    }
+
+    for (let i = 0; i < 10; i++) {
+        setTimeout(() => startConfetti(), i * 200);
+    }
+
+    // 背景をレインボーに
+    let hue = 0;
+    const rainbowInterval = setInterval(() => {
+        document.body.style.background = `hsl(${hue}, 50%, 90%)`;
+        hue = (hue + 5) % 360;
+    }, 50);
+
+    setTimeout(() => {
+        clearInterval(rainbowInterval);
+        document.body.style.background = '#f0e8f2';
+    }, 5000);
+}
+
 // マイクで音量検知
 let audioContext = null;
 let analyser = null;
@@ -270,16 +444,21 @@ function handleSwipeGesture() {
     if (absDiffX < 50 && absDiffY < 50) return;
 
     vibrate(50);
+    addCombo(); // コンボ追加
+
+    let direction = '';
 
     if (absDiffX > absDiffY) {
         // 横スワイプ
         if (diffX > 0) {
             // 右スワイプ
+            direction = 'right';
             showMessage('👉 スワイプでパーティー！');
             startConfetti();
             createBalloons();
         } else {
             // 左スワイプ
+            direction = 'left';
             showMessage('👈 もっと盛り上げよう！');
             startConfetti();
             launchFireworks();
@@ -288,16 +467,21 @@ function handleSwipeGesture() {
         // 縦スワイプ
         if (diffY > 0) {
             // 下スワイプ
+            direction = 'down';
             showMessage('👇 紙吹雪シャワー！');
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => startConfetti(), i * 200);
             }
         } else {
             // 上スワイプ
+            direction = 'up';
             showMessage('👆 花火打ち上げ！');
             createMegaFireworks();
         }
     }
+
+    // 隠しコマンドチェック
+    checkSecretCommand(direction);
 }
 
 // デバイスシェイク検知
@@ -409,16 +593,55 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(startConfetti, 6000);
 
     // タッチで花火と音楽（スマホ最適化）
+    let touchStartTime = 0;
+    let longPressTimer = null;
+    let isLongPress = false;
+
     document.body.addEventListener('touchstart', function(e) {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
+        touchStartTime = Date.now();
+        isLongPress = false;
+
+        // 長押し検知（700ms）
+        longPressTimer = setTimeout(() => {
+            isLongPress = true;
+            const touch = e.touches[0];
+            createRainbowFirework(touch.clientX, touch.clientY);
+            vibrate([100, 50, 100, 50, 100]);
+        }, 700);
+
+        // マルチタッチ検知
+        if (e.touches.length > 1) {
+            clearTimeout(longPressTimer);
+            const touchCount = Math.min(e.touches.length, 10);
+            showMessage(`🖐️ ${touchCount}本指タッチ！ 🖐️`);
+
+            // 指の本数分だけ花火
+            for (let i = 0; i < touchCount; i++) {
+                setTimeout(() => {
+                    const touch = e.touches[i] || e.touches[0];
+                    createFirework(touch.clientX, touch.clientY);
+                }, i * 100);
+            }
+
+            vibrate(Array(touchCount).fill(50));
+        }
     });
 
     document.body.addEventListener('touchend', function(e) {
+        clearTimeout(longPressTimer);
+
+        if (isLongPress) {
+            isLongPress = false;
+            return;
+        }
+
         touchEndX = e.changedTouches[0].screenX;
         touchEndY = e.changedTouches[0].screenY;
 
         const touch = e.changedTouches[0];
+        const touchDuration = Date.now() - touchStartTime;
 
         // ギフトボックスやろうそくのタッチは除外
         if (!e.target.closest('.gift-box') && !e.target.closest('.candle') && !e.target.closest('.blow-button')) {
@@ -426,9 +649,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const diffX = Math.abs(touchEndX - touchStartX);
             const diffY = Math.abs(touchEndY - touchStartY);
 
-            if (diffX < 10 && diffY < 10) {
+            if (diffX < 10 && diffY < 10 && touchDuration < 500) {
                 // タップ
+                handleDoubleTap(touch.clientX, touch.clientY);
                 createFirework(touch.clientX, touch.clientY);
+                addCombo();
                 vibrate(30);
 
                 if (!window.musicPlayed) {
@@ -436,11 +661,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.musicPlayed = true;
                     setTimeout(() => window.musicPlayed = false, 10000);
                 }
-            } else {
+            } else if (diffX >= 10 || diffY >= 10) {
                 // スワイプ
                 handleSwipeGesture();
             }
         }
+    });
+
+    document.body.addEventListener('touchcancel', function() {
+        clearTimeout(longPressTimer);
     });
 
     // ろうそくエリアをタップでマイク検知開始
@@ -474,6 +703,45 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.DeviceMotionEvent) {
         window.addEventListener('devicemotion', handleShake);
     }
+
+    // 画面傾き検知
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', handleOrientation);
+    }
+
+    // ランダムサプライズ（時々特別なエフェクト）
+    setInterval(() => {
+        const random = Math.random();
+        if (random > 0.95) {
+            // 5%の確率でサプライズ
+            const surprises = [
+                () => {
+                    showMessage('🎁 サプライズ！ランダムギフト！');
+                    createMegaFireworks();
+                },
+                () => {
+                    showMessage('🌟 突然の星降り！');
+                    for (let i = 0; i < 100; i++) {
+                        setTimeout(() => {
+                            const x = Math.random() * window.innerWidth;
+                            const y = Math.random() * window.innerHeight;
+                            createStarTrail(x, y);
+                        }, i * 10);
+                    }
+                },
+                () => {
+                    showMessage('🎈 バルーンパーティー！');
+                    createBalloons();
+                    createBalloons();
+                    createBalloons();
+                }
+            ];
+
+            const surprise = surprises[Math.floor(Math.random() * surprises.length)];
+            surprise();
+            vibrate([100, 50, 100, 50, 100]);
+        }
+    }, 5000);
 
     // ギフトボックスのセットアップ
     setupGiftBox();

@@ -156,6 +156,25 @@ h1 {
     }
 }
 
+/* 虹色花火 */
+.rainbow-particle {
+    width: 12px;
+    height: 12px;
+    animation: rainbowExplode 2s ease-out forwards;
+    box-shadow: 0 0 10px currentColor;
+}
+
+@keyframes rainbowExplode {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg);
+        opacity: 0;
+    }
+}
+
 /* キラキラのスタイル */
 .sparkle {
     position: absolute;
@@ -223,9 +242,12 @@ h1 {
 }
 
 .hint-item:nth-child(1) { animation-delay: 0s; }
-.hint-item:nth-child(2) { animation-delay: 0.5s; }
-.hint-item:nth-child(3) { animation-delay: 1s; }
-.hint-item:nth-child(4) { animation-delay: 1.5s; }
+.hint-item:nth-child(2) { animation-delay: 0.3s; }
+.hint-item:nth-child(3) { animation-delay: 0.6s; }
+.hint-item:nth-child(4) { animation-delay: 0.9s; }
+.hint-item:nth-child(5) { animation-delay: 1.2s; }
+.hint-item:nth-child(6) { animation-delay: 1.5s; }
+.hint-item:nth-child(7) { animation-delay: 1.8s; }
 
 @keyframes hintPulse {
     0%, 100% {
@@ -242,6 +264,8 @@ h1 {
 .cake-wrapper {
     position: relative;
     display: inline-block;
+    transition: transform 0.3s ease-out;
+    transform-origin: center bottom;
 }
 
 .candles-container {
@@ -494,7 +518,7 @@ h1 {
     }
 
     .gift-box {
-        bottom: 180px;
+        bottom: 260px;
         right: 15px;
         width: 70px;
         height: 90px;
@@ -519,12 +543,13 @@ h1 {
     }
 
     .touch-hints {
-        bottom: 15px;
+        bottom: 10px;
+        gap: 5px;
     }
 
     .hint-item {
-        font-size: 12px;
-        padding: 10px 15px;
+        font-size: 10px;
+        padding: 6px 12px;
     }
 }
 
