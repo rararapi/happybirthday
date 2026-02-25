@@ -117,25 +117,93 @@ function createSparkles() {
   }, 300);
 }
 
+// バイブレーション
+function vibrate(pattern) {
+    if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+    }
+}
+
+// マイクで音量検知
+let audioContext = null;
+let analyser = null;
+let microphone = null;
+let isListeningForBlow = false;
+
+async function startBlowDetection() {
+    if (isListeningForBlow) return;
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+        analyser.fftSize = 512;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        isListeningForBlow = true;
+        showMessage('🎤 息を吹きかけて！');
+
+        const checkBlow = () => {
+            if (!isListeningForBlow) return;
+
+            analyser.getByteFrequencyData(dataArray);
+            const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+
+            // 音量が一定以上なら「息を吹きかけた」と判定
+            if (average > 40) {
+                blowOutCandles();
+                stopBlowDetection();
+            } else {
+                requestAnimationFrame(checkBlow);
+            }
+        };
+
+        checkBlow();
+    } catch (err) {
+        console.log('マイクアクセス不可:', err);
+        showMessage('❌ マイクへのアクセスが必要です');
+    }
+}
+
+function stopBlowDetection() {
+    isListeningForBlow = false;
+    if (microphone) {
+        microphone.disconnect();
+        microphone = null;
+    }
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+}
+
 // ろうそくを吹き消す
-function blowCandles() {
-    const candles = document.querySelectorAll('.candle');
-    let blownCount = 0;
+function blowOutCandles() {
+    const candles = document.querySelectorAll('.candle:not(.blown)');
+
+    if (candles.length === 0) return;
+
+    vibrate([100, 50, 100]);
 
     candles.forEach((candle, index) => {
-        if (!candle.classList.contains('blown')) {
-            setTimeout(() => {
-                candle.classList.add('blown');
-                blownCount++;
+        setTimeout(() => {
+            candle.classList.add('blown');
 
-                if (blownCount === candles.length) {
-                    setTimeout(() => {
-                        showMessage('🎂 おめでとう！全部消えたよ！ 🎉');
-                        createMegaFireworks();
-                    }, 500);
-                }
-            }, index * 300);
-        }
+            const allCandles = document.querySelectorAll('.candle');
+            const blownCandles = document.querySelectorAll('.candle.blown');
+
+            if (allCandles.length === blownCandles.length) {
+                setTimeout(() => {
+                    showMessage('🎂 おめでとう！全部消えたよ！ 🎉');
+                    createMegaFireworks();
+                    vibrate([200, 100, 200, 100, 200]);
+                }, 500);
+            }
+        }, index * 300);
     });
 }
 
@@ -174,7 +242,7 @@ function showMessage(customMessage) {
     }, 3000);
 }
 
-// マウス追従の星
+// タッチで星（スマホ用）
 function createStarTrail(x, y) {
     const star = document.createElement('div');
     star.className = 'star-trail';
@@ -184,6 +252,52 @@ function createStarTrail(x, y) {
     document.body.appendChild(star);
 
     setTimeout(() => star.remove(), 1000);
+}
+
+// スワイプジェスチャー検知
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+function handleSwipeGesture() {
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+    const absDiffX = Math.abs(diffX);
+    const absDiffY = Math.abs(diffY);
+
+    // 最小スワイプ距離
+    if (absDiffX < 50 && absDiffY < 50) return;
+
+    vibrate(50);
+
+    if (absDiffX > absDiffY) {
+        // 横スワイプ
+        if (diffX > 0) {
+            // 右スワイプ
+            showMessage('👉 スワイプでパーティー！');
+            startConfetti();
+            createBalloons();
+        } else {
+            // 左スワイプ
+            showMessage('👈 もっと盛り上げよう！');
+            startConfetti();
+            launchFireworks();
+        }
+    } else {
+        // 縦スワイプ
+        if (diffY > 0) {
+            // 下スワイプ
+            showMessage('👇 紙吹雪シャワー！');
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => startConfetti(), i * 200);
+            }
+        } else {
+            // 上スワイプ
+            showMessage('👆 花火打ち上げ！');
+            createMegaFireworks();
+        }
+    }
 }
 
 // デバイスシェイク検知
@@ -294,43 +408,65 @@ document.addEventListener('DOMContentLoaded', function () {
     // 6秒ごとに紙吹雪を追加
     setInterval(startConfetti, 6000);
 
-    // クリックで花火と音楽
-    document.body.addEventListener('click', function(e) {
-        // ギフトボックスやろうそくのクリックは除外
-        if (!e.target.closest('.gift-box') && !e.target.closest('.candle')) {
-            createFirework(e.clientX, e.clientY);
-            if (!window.musicPlayed) {
-                playBirthdaySong();
-                window.musicPlayed = true;
-                setTimeout(() => window.musicPlayed = false, 10000);
+    // タッチで花火と音楽（スマホ最適化）
+    document.body.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    });
+
+    document.body.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+
+        const touch = e.changedTouches[0];
+
+        // ギフトボックスやろうそくのタッチは除外
+        if (!e.target.closest('.gift-box') && !e.target.closest('.candle') && !e.target.closest('.blow-button')) {
+            // スワイプかタップか判定
+            const diffX = Math.abs(touchEndX - touchStartX);
+            const diffY = Math.abs(touchEndY - touchStartY);
+
+            if (diffX < 10 && diffY < 10) {
+                // タップ
+                createFirework(touch.clientX, touch.clientY);
+                vibrate(30);
+
+                if (!window.musicPlayed) {
+                    playBirthdaySong();
+                    window.musicPlayed = true;
+                    setTimeout(() => window.musicPlayed = false, 10000);
+                }
+            } else {
+                // スワイプ
+                handleSwipeGesture();
             }
         }
     });
 
-    // ろうそくクリックイベント
-    document.querySelectorAll('.candle').forEach(candle => {
-        candle.addEventListener('click', function() {
-            if (!this.classList.contains('blown')) {
-                this.classList.add('blown');
+    // ろうそくエリアをタップでマイク検知開始
+    const candlesContainer = document.querySelector('.candles-container');
+    if (candlesContainer) {
+        candlesContainer.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const allCandles = document.querySelectorAll('.candle');
+            const blownCandles = document.querySelectorAll('.candle.blown');
 
-                const allCandles = document.querySelectorAll('.candle');
-                const blownCandles = document.querySelectorAll('.candle.blown');
-
-                if (allCandles.length === blownCandles.length) {
-                    setTimeout(() => {
-                        showMessage('🎂 おめでとう！全部消えたよ！ 🎉');
-                        createMegaFireworks();
-                    }, 500);
-                }
+            if (allCandles.length > blownCandles.length) {
+                startBlowDetection();
             }
         });
-    });
+    }
 
-    // マウス移動で星の軌跡
-    let mouseTrailEnabled = true;
-    document.addEventListener('mousemove', function(e) {
-        if (mouseTrailEnabled && Math.random() > 0.7) {
-            createStarTrail(e.clientX, e.clientY);
+    // タッチ移動で星の軌跡（スマホ用）
+    let lastTouchTime = 0;
+    document.addEventListener('touchmove', function(e) {
+        const now = Date.now();
+        if (now - lastTouchTime > 100) { // スロットル
+            const touch = e.touches[0];
+            if (Math.random() > 0.5) {
+                createStarTrail(touch.clientX, touch.clientY);
+            }
+            lastTouchTime = now;
         }
     });
 
@@ -351,6 +487,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 5秒後にろうそくのヒントを表示
     setTimeout(() => {
-        showMessage('🕯️ ろうそくをクリックして消してみてね！');
+        showMessage('🕯️ ろうそくエリアをタップして息を吹きかけてね！');
     }, 5000);
+
+    // 10秒後にスワイプのヒント
+    setTimeout(() => {
+        showMessage('👈👉 画面をスワイプしてみて！');
+    }, 10000);
 });

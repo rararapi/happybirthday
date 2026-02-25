@@ -7,6 +7,11 @@ body {
 	color: #333;
 	text-align: center;
 	padding: 20px;
+	overflow-x: hidden;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+	touch-action: pan-y;
 }
 
 .container {
@@ -191,33 +196,45 @@ h1 {
     }
 }
 
-/* クリック可能な領域を示すヒント */
-body {
-    cursor: pointer;
-}
-
-.click-hint {
+/* タッチヒント（スマホ用） */
+.touch-hints {
     position: fixed;
-    bottom: 20px;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #ff69b4;
-    animation: pulse 2s ease-in-out infinite;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     z-index: 10000;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
 }
 
-@keyframes pulse {
+.hint-item {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #ff69b4;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: hintPulse 3s ease-in-out infinite;
+    text-align: center;
+}
+
+.hint-item:nth-child(1) { animation-delay: 0s; }
+.hint-item:nth-child(2) { animation-delay: 0.5s; }
+.hint-item:nth-child(3) { animation-delay: 1s; }
+.hint-item:nth-child(4) { animation-delay: 1.5s; }
+
+@keyframes hintPulse {
     0%, 100% {
-        transform: translateX(-50%) scale(1);
+        transform: scale(1);
+        opacity: 0.9;
     }
     50% {
-        transform: translateX(-50%) scale(1.05);
+        transform: scale(1.03);
+        opacity: 1;
     }
 }
 
@@ -241,10 +258,12 @@ body {
     position: relative;
     cursor: pointer;
     transition: transform 0.2s;
+    padding: 20px;
+    margin: -20px;
 }
 
-.candle:hover {
-    transform: scale(1.1);
+.candle:active {
+    transform: scale(1.15);
 }
 
 .flame {
@@ -450,39 +469,102 @@ body {
     animation: pulse 1.5s infinite;
 }
 
-/* レスポンシブ対応 */
+/* スマホ最適化（モバイルファースト） */
 @media only screen and (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
     .candles-container {
-        gap: 25px;
-        top: 10%;
+        gap: 30px;
+        top: 12%;
     }
 
     .flame {
-        width: 12px;
-        height: 16px;
+        width: 18px;
+        height: 24px;
     }
 
     .gift-box {
-        bottom: 70px;
-        right: 20px;
-        width: 60px;
-        height: 80px;
+        bottom: 180px;
+        right: 15px;
+        width: 70px;
+        height: 90px;
     }
 
     .gift-body {
-        width: 60px;
-        height: 45px;
+        width: 70px;
+        height: 52px;
     }
 
     .gift-lid {
-        width: 60px;
-        height: 25px;
+        width: 70px;
+        height: 28px;
     }
 
     .message-popup {
-        padding: 20px 30px;
-        font-size: 18px;
-        max-width: 80%;
+        padding: 25px 35px;
+        font-size: 20px;
+        max-width: 85%;
         text-align: center;
+        border-radius: 25px;
+    }
+
+    .touch-hints {
+        bottom: 15px;
+    }
+
+    .hint-item {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+}
+
+/* 小さいスマホ用 */
+@media only screen and (max-width: 400px) {
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .candles-container {
+        gap: 20px;
+    }
+
+    .flame {
+        width: 15px;
+        height: 20px;
+    }
+
+    .hint-item {
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+}
+
+/* 横画面対応 */
+@media only screen and (orientation: landscape) and (max-height: 500px) {
+    .touch-hints {
+        flex-direction: row;
+        flex-wrap: wrap;
+        bottom: 5px;
+    }
+
+    .hint-item {
+        font-size: 10px;
+        padding: 6px 10px;
+        flex: 1 1 45%;
+    }
+
+    .gift-box {
+        bottom: 80px;
+        right: 10px;
     }
 }
