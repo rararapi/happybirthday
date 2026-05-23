@@ -25,12 +25,12 @@ function Balloon({ pos, color, phase, speed }: typeof BALLOON_DATA[0]) {
       {/* 風船本体 */}
       <mesh scale={[1, 1.2, 1]}>
         <sphereGeometry args={[0.3, 16, 12]} />
-        <meshStandardMaterial color={color} roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.25} roughness={0.35} metalness={0} />
       </mesh>
       {/* ひも */}
       <mesh position={[0, -0.55, 0]}>
         <cylinderGeometry args={[0.008, 0.008, 0.8, 4]} />
-        <meshStandardMaterial color="#ffffff" roughness={1} />
+        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.2} roughness={1} />
       </mesh>
     </group>
   )

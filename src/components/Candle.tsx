@@ -12,7 +12,7 @@ export default function Candle({ position, extinguish, color = '#ffeaa7' }: Prop
       {/* Body */}
       <mesh>
         <cylinderGeometry args={[0.065, 0.07, 0.5, 10]} />
-        <meshStandardMaterial color={color} roughness={0.55} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} roughness={0.55} />
       </mesh>
 
       {/* Wick */}

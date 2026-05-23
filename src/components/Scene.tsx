@@ -1,5 +1,4 @@
 import { Stars, OrbitControls } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import BirthdayCake from './BirthdayCake'
 import Table from './Table'
 import Balloons from './Balloons'
@@ -36,10 +35,6 @@ export default function Scene({ extinguish }: Props) {
         enableZoom={false}
         enablePan={false}
       />
-
-      <EffectComposer>
-        <Bloom intensity={0.8} luminanceThreshold={0.4} luminanceSmoothing={0.9} mipmapBlur />
-      </EffectComposer>
     </>
   )
 }

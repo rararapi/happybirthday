@@ -25,19 +25,19 @@ function CakeTier({ radius, height, color, frostColor, baseY }: CakeTierProps) {
       {/* Main body */}
       <mesh>
         <cylinderGeometry args={[radius, radius * 1.015, height, 40]} />
-        <meshStandardMaterial color={color} roughness={0.45} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} roughness={0.45} />
       </mesh>
 
       {/* Frosting cap on top */}
       <mesh position={[0, height / 2 + 0.035, 0]}>
         <cylinderGeometry args={[radius + 0.03, radius + 0.03, 0.07, 40]} />
-        <meshStandardMaterial color={frostColor} roughness={0.25} />
+        <meshStandardMaterial color={frostColor} emissive={frostColor} emissiveIntensity={0.15} roughness={0.25} />
       </mesh>
 
       {/* Frosting drip ring */}
       <mesh position={[0, height / 2 - 0.02, 0]}>
         <torusGeometry args={[radius + 0.01, 0.045, 6, 40]} />
-        <meshStandardMaterial color={frostColor} roughness={0.25} />
+        <meshStandardMaterial color={frostColor} emissive={frostColor} emissiveIntensity={0.15} roughness={0.25} />
       </mesh>
     </group>
   )
@@ -66,7 +66,7 @@ export default function BirthdayCake({ extinguish }: Props) {
       {/* Plate */}
       <mesh position={[0, -0.045, 0]}>
         <cylinderGeometry args={[1.65, 1.65, 0.09, 48]} />
-        <meshStandardMaterial color="#f5f5f0" roughness={0.15} metalness={0.35} />
+        <meshStandardMaterial color="#f5f5f0" emissive="#f5f5f0" emissiveIntensity={0.12} roughness={0.15} metalness={0.1} />
       </mesh>
 
       {/* Cake tiers */}
