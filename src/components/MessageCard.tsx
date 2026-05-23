@@ -31,34 +31,6 @@ export default function MessageCard({ name }: Props) {
           </p>
         )}
 
-        <div className="space-y-2 mt-4">
-          <div
-            className="rounded-2xl p-3"
-            style={{ background: 'rgba(255,255,255,0.08)' }}
-          >
-            <p className="text-xs text-white/60 mb-0.5">今日の運勢</p>
-            <p className="text-2xl font-bold" style={{ color: '#fdcb6e' }}>
-              {fortune.omikuji}
-            </p>
-          </div>
-
-          <div
-            className="rounded-2xl p-3"
-            style={{ background: 'rgba(255,255,255,0.08)' }}
-          >
-            <p className="text-xs text-white/60 mb-0.5">あなたの称号</p>
-            <p className="text-lg font-semibold text-white">{fortune.title}</p>
-          </div>
-
-          <div
-            className="rounded-2xl p-3"
-            style={{ background: 'rgba(255,255,255,0.08)' }}
-          >
-            <p className="text-xs text-white/60 mb-0.5">ラッキーフード</p>
-            <p className="text-lg font-semibold text-white">{fortune.luckyFood}</p>
-          </div>
-        </div>
-
         <p className="text-white/70 text-sm mt-5 leading-relaxed px-2">
           {fortune.message}
         </p>
