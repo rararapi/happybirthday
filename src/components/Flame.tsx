@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -90,6 +90,20 @@ export default function Flame({ extinguish }: Props) {
   const outerMatRefs = useRef<Array<THREE.ShaderMaterial | null>>([])
   const innerMatRefs = useRef<Array<THREE.ShaderMaterial | null>>([])
   const extinguishRef = useRef(extinguish)
+  const outerUniforms = useMemo(
+    () => [
+      makeUniforms('#5f1200', '#ff6a00', '#ffd36a', 0.72),
+      makeUniforms('#5f1200', '#ff6a00', '#ffd36a', 0.72),
+    ],
+    [],
+  )
+  const innerUniforms = useMemo(
+    () => [
+      makeUniforms('#fff7d1', '#ffe66d', '#ff8a00', 0.95),
+      makeUniforms('#fff7d1', '#ffe66d', '#ff8a00', 0.95),
+    ],
+    [],
+  )
   extinguishRef.current = extinguish
 
   useFrame(({ clock }) => {
@@ -135,7 +149,7 @@ export default function Flame({ extinguish }: Props) {
             }}
             vertexShader={vertexShader}
             fragmentShader={fragmentShader}
-            uniforms={makeUniforms('#5f1200', '#ff6a00', '#ffd36a', 0.72)}
+            uniforms={outerUniforms[index]}
             transparent
             blending={THREE.AdditiveBlending}
             depthWrite={false}
@@ -152,7 +166,7 @@ export default function Flame({ extinguish }: Props) {
             }}
             vertexShader={vertexShader}
             fragmentShader={fragmentShader}
-            uniforms={makeUniforms('#fff7d1', '#ffe66d', '#ff8a00', 0.95)}
+            uniforms={innerUniforms[index]}
             transparent
             blending={THREE.AdditiveBlending}
             depthWrite={false}

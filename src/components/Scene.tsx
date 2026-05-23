@@ -10,7 +10,7 @@ interface Props {
 export default function Scene({ extinguish }: Props) {
   return (
     <>
-      <Stars radius={100} depth={50} count={2000} factor={3} saturation={0} fade speed={0.3} />
+      <Stars radius={100} depth={65} count={3600} factor={4.6} saturation={0.35} fade speed={0.9} />
 
       {/* 照明 — ケーキを明るくする */}
       <ambientLight intensity={0.8} />
