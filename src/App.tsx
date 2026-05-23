@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useGiftName } from './hooks/useGiftName'
 import { useConfetti } from './hooks/useConfetti'
@@ -20,38 +20,69 @@ export default function App() {
 
   const holdStartRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
+  const celebrationTimerRef = useRef<number | null>(null)
 
-  const startHold = useCallback(() => {
+  const cancelAnimation = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+  }, [])
+
+  const startHold = useCallback((event: PointerEvent<HTMLDivElement>) => {
     if (appState !== 'idle') return
+
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    cancelAnimation()
     holdStartRef.current = performance.now()
     setAppState('blowing')
 
     const tick = () => {
       if (holdStartRef.current === null) return
-      const p = Math.min((performance.now() - holdStartRef.current) / HOLD_MS, 1)
-      setProgress(p)
-      setExtinguish(p)
-      if (p < 1) {
+
+      const nextProgress = Math.min((performance.now() - holdStartRef.current) / HOLD_MS, 1)
+      setProgress(nextProgress)
+      setExtinguish(nextProgress)
+
+      if (nextProgress < 1) {
         rafRef.current = requestAnimationFrame(tick)
-      } else {
-        setAppState('blown')
-        fireConfetti()
-        setTimeout(() => setAppState('celebrated'), 1600)
+        return
       }
+
+      holdStartRef.current = null
+      rafRef.current = null
+      setExtinguish(1)
+      setAppState('blown')
+      fireConfetti()
+      celebrationTimerRef.current = window.setTimeout(() => {
+        setAppState('celebrated')
+      }, 1600)
     }
+
     rafRef.current = requestAnimationFrame(tick)
-  }, [appState, fireConfetti])
+  }, [appState, cancelAnimation, fireConfetti])
 
   const cancelHold = useCallback(() => {
     if (appState !== 'blowing') return
+
     holdStartRef.current = null
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
+    cancelAnimation()
     setAppState('idle')
     setProgress(0)
     setExtinguish(0)
-  }, [appState])
+  }, [appState, cancelAnimation])
 
-  const isBg = appState !== 'celebrated'
+  useEffect(() => {
+    return () => {
+      cancelAnimation()
+      if (celebrationTimerRef.current !== null) {
+        window.clearTimeout(celebrationTimerRef.current)
+      }
+    }
+  }, [cancelAnimation])
+
+  const isInteractive = appState === 'idle' || appState === 'blowing'
 
   return (
     <div
@@ -66,13 +97,11 @@ export default function App() {
         <Scene extinguish={extinguish} />
       </Canvas>
 
-      {/* Interaction overlay — covers canvas to capture hold events */}
-      {isBg && (
+      {isInteractive && (
         <div
           className="absolute inset-0"
           onPointerDown={startHold}
           onPointerUp={cancelHold}
-          onPointerLeave={cancelHold}
           onPointerCancel={cancelHold}
           style={{ touchAction: 'none' }}
         />
@@ -91,12 +120,15 @@ function BlowProgress({ progress }: { progress: number }) {
   const r = 30
   const circ = 2 * Math.PI * r
   const dash = circ * progress
+
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 pointer-events-none">
       <svg width="76" height="76" viewBox="0 0 76 76">
         <circle cx="38" cy="38" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
         <circle
-          cx="38" cy="38" r={r}
+          cx="38"
+          cy="38"
+          r={r}
           fill="none"
           stroke="#fdcb6e"
           strokeWidth="6"
@@ -105,7 +137,7 @@ function BlowProgress({ progress }: { progress: number }) {
           transform="rotate(-90 38 38)"
         />
       </svg>
-      <p className="text-white/70 text-sm mt-3">そのまま押し続けて！</p>
+      <p className="text-white/70 text-sm mt-3">そのまま長押ししてね</p>
     </div>
   )
 }

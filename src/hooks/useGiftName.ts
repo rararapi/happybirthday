@@ -24,8 +24,8 @@ function decryptName(enc: string): string {
 export function useGiftName(): string {
   const params = new URLSearchParams(window.location.search)
   const name = params.get('name')
-  if (name) return name.toUpperCase()
-  const nEnc = params.get('n_enc')
+  if (name) return name.trim()
+  const nEnc = params.get('n_enc') ?? params.get('n_cnt')
   if (nEnc) return decryptName(nEnc)
   return ''
 }
