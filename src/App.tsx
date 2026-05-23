@@ -52,6 +52,7 @@ export default function App() {
 
       holdStartRef.current = null
       rafRef.current = null
+      setProgress(1)
       setExtinguish(1)
       setAppState('blown')
       fireConfetti()
@@ -64,7 +65,7 @@ export default function App() {
   }, [appState, cancelAnimation, fireConfetti])
 
   const cancelHold = useCallback(() => {
-    if (appState !== 'blowing') return
+    if (appState !== 'blowing' || holdStartRef.current === null) return
 
     holdStartRef.current = null
     cancelAnimation()

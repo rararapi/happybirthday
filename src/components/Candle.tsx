@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import Flame from './Flame'
 
 interface Props {
@@ -7,6 +10,14 @@ interface Props {
 }
 
 export default function Candle({ position, extinguish, color = '#ffeaa7' }: Props) {
+  const lightRef = useRef<THREE.PointLight>(null)
+
+  useFrame(({ clock }) => {
+    if (!lightRef.current) return
+    const flicker = 0.86 + Math.sin(clock.getElapsedTime() * 18) * 0.1
+    lightRef.current.intensity = Math.max(0, 1 - extinguish) * 1.7 * flicker
+  })
+
   return (
     <group position={position}>
       {/* Body */}
@@ -25,9 +36,10 @@ export default function Candle({ position, extinguish, color = '#ffeaa7' }: Prop
       <group position={[0, 0.30, 0]}>
         <Flame extinguish={extinguish} />
         <pointLight
+          ref={lightRef}
           color="#ff9922"
-          intensity={(1 - extinguish) * 1.5}
-          distance={3}
+          intensity={(1 - extinguish) * 1.7}
+          distance={3.5}
           decay={2}
         />
       </group>
