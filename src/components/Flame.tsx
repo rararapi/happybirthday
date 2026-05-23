@@ -4,10 +4,10 @@ import * as THREE from 'three'
 
 const vertexShader = /* glsl */ `
 uniform float time;
+uniform float height;
+uniform float width;
 uniform float flicker;
-uniform float size;
-varying float vY;
-varying float vRadial;
+varying vec2 vUv;
 
 float hash(vec2 p) {
   p = fract(p * vec2(234.34, 435.345));
@@ -27,39 +27,43 @@ float noise(vec2 p) {
 }
 
 void main() {
-  vec3 pos = position;
-  vY = clamp((pos.y + 0.25) / 0.5, 0.0, 1.0);
-  vRadial = length(pos.xz);
+  vUv = uv;
 
-  float n = noise(vec2(pos.x * 12.0 + time * 2.8, vY * 5.0 + time * 3.2));
-  float sway = (n - 0.5) * 0.12 * vY * flicker;
-  pos.x += sway;
-  pos.z += sway * 0.35;
-  pos.xz *= mix(0.7, 1.0, size);
-  pos.y = -0.25 + (pos.y + 0.25) * size * mix(0.92, 1.08, flicker);
+  float y = uv.y;
+  vec3 pos = position;
+
+  float n = noise(vec2(y * 3.0 + time * 2.4, time * 0.7));
+  float sway = (n - 0.5) * 0.08 * y * flicker;
+
+  pos.x = pos.x * width + sway;
+  pos.y = y * height;
+  pos.z = 0.0;
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `
 
 const fragmentShader = /* glsl */ `
-uniform vec3 bottomColor;
-uniform vec3 middleColor;
-uniform vec3 topColor;
+uniform vec3 baseColor;
+uniform vec3 midColor;
+uniform vec3 tipColor;
 uniform float opacity;
-varying float vY;
-varying float vRadial;
+varying vec2 vUv;
 
 void main() {
-  float baseFade = smoothstep(0.0, 0.16, vY);
-  float tipFade = 1.0 - smoothstep(0.72, 1.0, vY);
-  float radialFade = 1.0 - smoothstep(0.0, 0.095, vRadial);
-  float alpha = baseFade * tipFade * mix(0.42, 1.0, radialFade) * opacity;
+  float x = abs(vUv.x - 0.5) * 2.0;
+  float y = vUv.y;
+
+  float body = pow(sin(y * 3.14159265), 0.55) * (1.0 - y * 0.28);
+  float edge = smoothstep(body + 0.16, body - 0.04, x);
+  float baseFade = smoothstep(0.0, 0.08, y);
+  float tipFade = 1.0 - smoothstep(0.78, 1.0, y);
+  float alpha = edge * baseFade * tipFade * opacity;
 
   if (alpha < 0.01) discard;
 
-  vec3 warm = mix(bottomColor, middleColor, smoothstep(0.0, 0.55, vY));
-  vec3 color = mix(warm, topColor, smoothstep(0.58, 1.0, vY));
+  vec3 lower = mix(baseColor, midColor, smoothstep(0.0, 0.52, y));
+  vec3 color = mix(lower, tipColor, smoothstep(0.54, 1.0, y));
   gl_FragColor = vec4(color, alpha);
 }
 `
@@ -68,79 +72,94 @@ interface Props {
   extinguish: number
 }
 
-function makeUniforms(bottom: string, middle: string, top: string, opacity: number) {
+function makeUniforms(base: string, mid: string, tip: string, opacity: number) {
   return {
     time: { value: 0 },
+    height: { value: 0.54 },
+    width: { value: 0.22 },
     flicker: { value: 1 },
-    size: { value: 1 },
     opacity: { value: opacity },
-    bottomColor: { value: new THREE.Color(bottom) },
-    middleColor: { value: new THREE.Color(middle) },
-    topColor: { value: new THREE.Color(top) },
+    baseColor: { value: new THREE.Color(base) },
+    midColor: { value: new THREE.Color(mid) },
+    tipColor: { value: new THREE.Color(tip) },
   }
 }
 
 export default function Flame({ extinguish }: Props) {
   const groupRef = useRef<THREE.Group>(null)
-  const outerMatRef = useRef<THREE.ShaderMaterial>(null)
-  const innerMatRef = useRef<THREE.ShaderMaterial>(null)
+  const outerMatRefs = useRef<Array<THREE.ShaderMaterial | null>>([])
+  const innerMatRefs = useRef<Array<THREE.ShaderMaterial | null>>([])
   const extinguishRef = useRef(extinguish)
   extinguishRef.current = extinguish
 
   useFrame(({ clock }) => {
     const remaining = Math.max(0, 1 - extinguishRef.current)
     const time = clock.getElapsedTime()
-    const flicker = 0.86 + Math.sin(time * 18) * 0.08 + Math.sin(time * 31) * 0.04
+    const flicker = 0.9 + Math.sin(time * 16) * 0.08 + Math.sin(time * 29) * 0.05
+    const height = THREE.MathUtils.lerp(0.035, 0.54, remaining) * flicker
+    const width = THREE.MathUtils.lerp(0.012, 0.22, remaining)
 
     if (groupRef.current) {
-      groupRef.current.visible = remaining > 0.02
+      groupRef.current.visible = remaining > 0.015
     }
 
-    for (const mat of [outerMatRef.current, innerMatRef.current]) {
-      if (!mat) continue
-      mat.uniforms.time.value = time
+    outerMatRefs.current.forEach((mat, index) => {
+      if (!mat) return
+      mat.uniforms.time.value = time + index * 0.16
+      mat.uniforms.height.value = height
+      mat.uniforms.width.value = width
       mat.uniforms.flicker.value = flicker
-      mat.uniforms.size.value = remaining
-    }
+      mat.uniforms.opacity.value = remaining * 0.72
+    })
 
-    if (outerMatRef.current) {
-      outerMatRef.current.uniforms.opacity.value = remaining * 0.72
-    }
-    if (innerMatRef.current) {
-      innerMatRef.current.uniforms.opacity.value = remaining * 0.95
-    }
+    innerMatRefs.current.forEach((mat, index) => {
+      if (!mat) return
+      mat.uniforms.time.value = time + 0.2 + index * 0.16
+      mat.uniforms.height.value = height * 0.78
+      mat.uniforms.width.value = width * 0.48
+      mat.uniforms.flicker.value = flicker
+      mat.uniforms.opacity.value = remaining * 0.95
+    })
   })
 
   if (extinguish >= 1) return null
 
   return (
-    <group ref={groupRef} position={[0, 0.25, 0]}>
-      <mesh>
-        <coneGeometry args={[0.105, 0.5, 28, 8, true]} />
-        <shaderMaterial
-          ref={outerMatRef}
-          vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
-          uniforms={makeUniforms('#7a1200', '#ff6a00', '#ffd36a', 0.72)}
-          transparent
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      <mesh position={[0, -0.015, 0]} scale={[0.52, 0.82, 0.52]}>
-        <coneGeometry args={[0.085, 0.48, 28, 8, true]} />
-        <shaderMaterial
-          ref={innerMatRef}
-          vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
-          uniforms={makeUniforms('#fff7d1', '#ffe66d', '#ff8a00', 0.95)}
-          transparent
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+    <group ref={groupRef}>
+      {[0, Math.PI / 2].map((rotation, index) => (
+        <mesh key={`outer-${rotation}`} rotation={[0, rotation, 0]}>
+          <planeGeometry args={[1, 1, 18, 28]} />
+          <shaderMaterial
+            ref={(mat) => {
+              outerMatRefs.current[index] = mat
+            }}
+            vertexShader={vertexShader}
+            fragmentShader={fragmentShader}
+            uniforms={makeUniforms('#5f1200', '#ff6a00', '#ffd36a', 0.72)}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
+      {[Math.PI / 4, -Math.PI / 4].map((rotation, index) => (
+        <mesh key={`inner-${rotation}`} rotation={[0, rotation, 0]}>
+          <planeGeometry args={[1, 1, 18, 28]} />
+          <shaderMaterial
+            ref={(mat) => {
+              innerMatRefs.current[index] = mat
+            }}
+            vertexShader={vertexShader}
+            fragmentShader={fragmentShader}
+            uniforms={makeUniforms('#fff7d1', '#ffe66d', '#ff8a00', 0.95)}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
     </group>
   )
 }
