@@ -1,8 +1,8 @@
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
-const vert = /* glsl */`
+const vert = /* glsl */ `
 uniform float time;
 uniform float extinguish;
 varying float vY;
@@ -39,9 +39,9 @@ void main() {
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
-`
+`;
 
-const frag = /* glsl */`
+const frag = /* glsl */ `
 uniform float extinguish;
 varying float vY;
 
@@ -61,22 +61,22 @@ void main() {
   if (alpha < 0.01) discard;
   gl_FragColor = vec4(color, alpha);
 }
-`
+`;
 
 interface Props {
-  extinguish: number
+  extinguish: number;
 }
 
 export default function Flame({ extinguish }: Props) {
-  const matRef = useRef<THREE.ShaderMaterial>(null)
-  const extRef = useRef(extinguish)
-  extRef.current = extinguish
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+  const extRef = useRef(extinguish);
+  extRef.current = extinguish;
 
   useFrame(({ clock }) => {
-    if (!matRef.current) return
-    matRef.current.uniforms.time.value = clock.getElapsedTime()
-    matRef.current.uniforms.extinguish.value = extRef.current
-  })
+    if (!matRef.current) return;
+    matRef.current.uniforms.time.value = clock.getElapsedTime();
+    matRef.current.uniforms.extinguish.value = extRef.current;
+  });
 
   return (
     // Offset so cone base (y=-0.225) sits at the wick tip (y=0 of this group)
@@ -95,5 +95,5 @@ export default function Flame({ extinguish }: Props) {
         depthWrite={false}
       />
     </mesh>
-  )
+  );
 }
