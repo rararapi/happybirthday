@@ -1,39 +1,32 @@
-import { Stars } from '@react-three/drei'
+import { Stars, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import GiftBox from './GiftBox'
-import type { GiftState } from '../App'
+import BirthdayCake from './BirthdayCake'
 
 interface Props {
-  state: GiftState
-  onOpen: () => void
+  extinguish: number
 }
 
-export default function Scene({ state, onOpen }: Props) {
+export default function Scene({ extinguish }: Props) {
   return (
     <>
-      <Stars
-        radius={100}
-        depth={50}
-        count={2000}
-        factor={4}
-        saturation={0}
-        fade
-        speed={0.5}
+      <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={0.4} />
+
+      <ambientLight intensity={0.25} />
+      <directionalLight position={[4, 6, 4]} intensity={0.9} color="#ffffff" />
+      <directionalLight position={[-3, 3, -3]} intensity={0.3} color="#aa99ff" />
+
+      <BirthdayCake extinguish={extinguish} />
+
+      <OrbitControls
+        autoRotate
+        autoRotateSpeed={0.7}
+        enableRotate={false}
+        enableZoom={false}
+        enablePan={false}
       />
 
-      <ambientLight intensity={0.5} />
-      <pointLight position={[5, 5, 5]} intensity={1.2} color="#ffffff" />
-      <pointLight position={[-4, 3, -4]} intensity={0.4} color="#cc88ff" />
-
-      <GiftBox state={state} onOpen={onOpen} />
-
       <EffectComposer>
-        <Bloom
-          intensity={0.6}
-          luminanceThreshold={0.3}
-          luminanceSmoothing={0.9}
-          mipmapBlur
-        />
+        <Bloom intensity={1.2} luminanceThreshold={0.25} luminanceSmoothing={0.9} mipmapBlur />
       </EffectComposer>
     </>
   )
