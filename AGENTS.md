@@ -41,7 +41,7 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 
 ### Supporting Files
 
-- `encrypt/` - Helper page for generating encrypted name parameters.
+- `encrypt/` - Helper page for generating encrypted name parameters. `npm run build` copies it to `dist/encrypt/`.
 - `vite.config.ts` - Vite configuration for GitHub Pages under `/happybirthday/`.
 - `src/index.css` - Tailwind and global styles.
 
