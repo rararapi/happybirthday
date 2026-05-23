@@ -1,13 +1,10 @@
-import { useState } from 'react'
-import { getRandomFortune } from '../data/messages'
+import { birthdayMessage } from '../data/messages'
 
 interface Props {
   name: string
 }
 
 export default function MessageCard({ name }: Props) {
-  const [fortune] = useState(() => getRandomFortune())
-
   return (
     <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
       <div
@@ -32,7 +29,7 @@ export default function MessageCard({ name }: Props) {
         )}
 
         <p className="text-white/70 text-sm mt-5 leading-relaxed px-2">
-          {fortune.message}
+          {birthdayMessage}
         </p>
       </div>
     </div>
