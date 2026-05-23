@@ -1,6 +1,8 @@
 import { Stars, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import BirthdayCake from './BirthdayCake'
+import Table from './Table'
+import Balloons from './Balloons'
 
 interface Props {
   extinguish: number
@@ -9,24 +11,34 @@ interface Props {
 export default function Scene({ extinguish }: Props) {
   return (
     <>
-      <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={0.4} />
+      <Stars radius={100} depth={50} count={2000} factor={3} saturation={0} fade speed={0.3} />
 
-      <ambientLight intensity={0.25} />
-      <directionalLight position={[4, 6, 4]} intensity={0.9} color="#ffffff" />
-      <directionalLight position={[-3, 3, -3]} intensity={0.3} color="#aa99ff" />
+      {/* 照明 — ケーキを明るくする */}
+      <ambientLight intensity={0.8} />
+      <hemisphereLight args={['#ffe8d6', '#1a0a3d', 0.5]} />
+      <directionalLight position={[5, 8, 5]} intensity={1.5} color="#fff8f0" />
+      <directionalLight position={[-4, 4, -4]} intensity={0.6} color="#c8b8ff" />
+      <directionalLight position={[0, -2, 6]} intensity={0.4} color="#ffe0b0" />
 
+      {/* パーティー雰囲気の色付きライト */}
+      <pointLight position={[-4, 3, -1]} color="#ff69b4" intensity={0.8} distance={10} decay={2} />
+      <pointLight position={[4, 2, -2]} color="#4169e1" intensity={0.6} distance={10} decay={2} />
+      <pointLight position={[0, 4, 2]} color="#ffd700" intensity={0.5} distance={10} decay={2} />
+
+      <Table />
       <BirthdayCake extinguish={extinguish} />
+      <Balloons />
 
       <OrbitControls
         autoRotate
-        autoRotateSpeed={0.7}
+        autoRotateSpeed={0.6}
         enableRotate={false}
         enableZoom={false}
         enablePan={false}
       />
 
       <EffectComposer>
-        <Bloom intensity={1.2} luminanceThreshold={0.25} luminanceSmoothing={0.9} mipmapBlur />
+        <Bloom intensity={0.8} luminanceThreshold={0.4} luminanceSmoothing={0.9} mipmapBlur />
       </EffectComposer>
     </>
   )

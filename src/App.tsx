@@ -60,7 +60,7 @@ export default function App() {
     >
       <Canvas
         gl={{ alpha: true, antialias: true }}
-        camera={{ position: [0, 1.2, 5.5], fov: 50 }}
+        camera={{ position: [0, 0.8, 6.5], fov: 52 }}
         style={{ position: 'absolute', inset: 0 }}
       >
         <Scene extinguish={extinguish} />

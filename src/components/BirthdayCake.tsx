@@ -62,7 +62,7 @@ export default function BirthdayCake({ extinguish }: Props) {
   }
 
   return (
-    <group position={[0, -1.25, 0]}>
+    <group position={[0, -1.86, 0]}>
       {/* Plate */}
       <mesh position={[0, -0.045, 0]}>
         <cylinderGeometry args={[1.65, 1.65, 0.09, 48]} />
