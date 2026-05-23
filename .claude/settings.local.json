@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir encrypt:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(cmd /c \"mkdir encrypt 2>nul\")",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(python -m http.server:*)",
+      "Bash(netstat:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8123/)",
+      "PowerShell(node --input-type=module --eval \"$\\(Get-Content 'C:\\\\Git\\\\Study\\\\happybirthday\\\\script.js' -Raw\\)\" 2>&1 | Select-Object -First 10)"
+    ]
+  }
+}
