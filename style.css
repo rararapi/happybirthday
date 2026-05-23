@@ -2,74 +2,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 body {
-	font-family: "Roboto", sans-serif;
-	background-color: #f0e8f2;
-	color: #333;
-	text-align: center;
-	padding: 20px;
-	overflow-x: hidden;
-	-webkit-user-select: none;
-	user-select: none;
-	-webkit-tap-highlight-color: transparent;
-	touch-action: pan-y;
+    font-family: "Roboto", sans-serif;
+    background-color: #f0e8f2;
+    color: #333;
+    text-align: center;
+    padding: 20px;
+    overflow-x: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
 }
 
 .container {
-	background-color: #fff;
-	border-radius: 10px;
-	padding: 20px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	max-width: 600px;
-	margin: auto;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: auto;
 }
 
 h1 {
-	font-weight: 700;
-	font-size: 2.5em;
-	opacity: 0;
-	animation: fadeIn 1.5s ease-out forwards;
+    font-weight: 700;
+    font-size: 2.5em;
+    opacity: 0;
+    animation: fadeIn 1.5s ease-out forwards, textGlow 2s ease-in-out infinite alternate;
 }
 
 .birthday-cake {
-	max-width: 100%;
-	height: auto;
-	opacity: 0;
-	animation: slideIn 2s ease-out forwards;
-	animation-delay: 0.5s;
-}
-
-@media only screen and (max-width: 600px) {
-	body {
-		padding: 10px;
-	}
-
-	.container {
-		padding: 15px;
-	}
-
-	h1 {
-		font-size: 2em;
-	}
+    max-width: 100%;
+    height: auto;
+    opacity: 0;
+    animation: slideIn 2s ease-out forwards;
+    animation-delay: 0.5s;
 }
 
 @keyframes fadeIn {
-	to {
-		opacity: 1;
-	}
+    to { opacity: 1; }
 }
 
 @keyframes slideIn {
-	from {
-		transform: translateY(-100px);
-		opacity: 0;
-	}
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
+    from { transform: translateY(-100px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
 }
 
-/* 紙吹雪のスタイル */
+@keyframes textGlow {
+    from { text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4; }
+    to   { text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffd700; }
+}
+
+/* 紙吹雪 */
 #confettiContainer {
     position: fixed;
     top: 0;
@@ -91,17 +74,11 @@ h1 {
 }
 
 @keyframes confettiFall {
-    0% {
-        opacity: 1;
-        transform: translateY(0) rotateZ(0deg);
-    }
-    100% {
-        opacity: 0.7;
-        transform: translateY(100vh) rotateZ(720deg);
-    }
+    0%   { opacity: 1; transform: translateY(0) rotateZ(0deg); }
+    100% { opacity: 0.7; transform: translateY(100vh) rotateZ(720deg); }
 }
 
-/* バルーンのスタイル */
+/* バルーン */
 .balloon {
     position: absolute;
     bottom: -100px;
@@ -123,20 +100,12 @@ h1 {
 }
 
 @keyframes balloonFloat {
-    0% {
-        transform: translateY(0) translateX(0) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        transform: translateY(-50vh) translateX(20px) rotate(5deg);
-    }
-    100% {
-        transform: translateY(-120vh) translateX(-20px) rotate(-5deg);
-        opacity: 0.5;
-    }
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+    50%  { transform: translateY(-50vh) translateX(20px) rotate(5deg); }
+    100% { transform: translateY(-120vh) translateX(-20px) rotate(-5deg); opacity: 0.5; }
 }
 
-/* 花火のスタイル */
+/* 花火 (DOM fallback) */
 .firework-particle {
     position: absolute;
     width: 8px;
@@ -146,17 +115,10 @@ h1 {
 }
 
 @keyframes fireworkExplode {
-    0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--tx), var(--ty)) scale(0);
-        opacity: 0;
-    }
+    0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
 
-/* 虹色花火 */
 .rainbow-particle {
     width: 12px;
     height: 12px;
@@ -165,17 +127,11 @@ h1 {
 }
 
 @keyframes rainbowExplode {
-    0% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg);
-        opacity: 0;
-    }
+    0%   { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg); opacity: 0; }
 }
 
-/* キラキラのスタイル */
+/* キラキラ (DOM fallback) */
 .sparkle {
     position: absolute;
     width: 4px;
@@ -187,323 +143,15 @@ h1 {
 }
 
 @keyframes sparkleAnimation {
-    0% {
-        transform: scale(0) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.5) rotate(180deg);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(0) rotate(360deg);
-        opacity: 0;
-    }
+    0%   { transform: scale(0) rotate(0deg); opacity: 1; }
+    50%  { transform: scale(1.5) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
 }
 
-/* テキストに輝きを追加 */
-h1 {
-    animation: fadeIn 1.5s ease-out forwards, textGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes textGlow {
-    from {
-        text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4;
-    }
-    to {
-        text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffd700;
-    }
-}
-
-/* ヒントボタン */
-.hint-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 15px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    cursor: pointer;
-    z-index: 10001;
-    transition: all 0.3s;
-    animation: hintButtonPulse 2s ease-in-out infinite;
-}
-
-.hint-button:active {
-    transform: scale(0.95);
-}
-
-@keyframes hintButtonPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-}
-
-/* 実績ボタン */
-.achievement-button {
-    position: fixed;
-    bottom: 80px;
-    right: 20px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 15px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
-    cursor: pointer;
-    z-index: 10001;
-    transition: all 0.3s;
-}
-
-.achievement-button:active {
-    transform: scale(0.95);
-}
-
-/* 実績解除通知 */
-.achievement-notification {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-    color: white;
-    padding: 20px 30px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    z-index: 10002;
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.achievement-notification.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
-.achievement-icon {
-    font-size: 48px;
-}
-
-.achievement-content {
-    text-align: left;
-}
-
-.achievement-title {
-    font-size: 14px;
-    font-weight: bold;
-    opacity: 0.9;
-}
-
-.achievement-name {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 5px 0;
-}
-
-.achievement-desc {
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-/* 実績モーダル */
-.achievement-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10003;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-}
-
-.achievement-modal.show {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.achievement-modal-content {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-.close-modal {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #f44336;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.achievement-modal-title {
-    margin: 0 0 20px 0;
-    font-size: 24px;
-    text-align: center;
-}
-
-.achievement-progress {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.progress-text {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 20px;
-    background: #e0e0e0;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    transition: width 0.5s;
-}
-
-.achievements-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.achievement-list-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    border-radius: 10px;
-    background: #f5f5f5;
-    transition: all 0.3s;
-}
-
-.achievement-list-item.unlocked {
-    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-}
-
-.achievement-list-item.locked {
-    background: #e0e0e0;
-    opacity: 0.6;
-}
-
-.achievement-list-icon {
-    font-size: 40px;
-}
-
-.achievement-list-content {
-    flex: 1;
-}
-
-.achievement-list-name {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 3px;
-}
-
-.achievement-list-desc {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-/* タッチヒント（スマホ用） */
-.touch-hints {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 10000;
-    width: 90%;
-    max-width: 400px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.4s ease-out;
-}
-
-.touch-hints.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    pointer-events: auto;
-}
-
-.hint-item {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 12px 20px;
-    border-radius: 25px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #ff69b4;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    animation: hintPulse 3s ease-in-out infinite;
-    text-align: center;
-}
-
-.hint-item:nth-child(1) { animation-delay: 0s; }
-.hint-item:nth-child(2) { animation-delay: 0.3s; }
-.hint-item:nth-child(3) { animation-delay: 0.6s; }
-.hint-item:nth-child(4) { animation-delay: 0.9s; }
-.hint-item:nth-child(5) { animation-delay: 1.2s; }
-.hint-item:nth-child(6) { animation-delay: 1.5s; }
-.hint-item:nth-child(7) { animation-delay: 1.8s; }
-
-@keyframes hintPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.9;
-    }
-    50% {
-        transform: scale(1.03);
-        opacity: 1;
-    }
-}
-
-/* ケーキのろうそく */
+/* ろうそく */
 .cake-wrapper {
     position: relative;
     display: inline-block;
-    transition: transform 0.3s ease-out;
     transform-origin: center bottom;
 }
 
@@ -525,9 +173,7 @@ h1 {
     margin: -20px;
 }
 
-.candle:active {
-    transform: scale(1.15);
-}
+.candle:active { transform: scale(1.15); }
 
 .flame {
     width: 15px;
@@ -540,7 +186,7 @@ h1 {
 }
 
 @keyframes flicker {
-    0% { transform: scale(1) translateY(0); }
+    0%   { transform: scale(1) translateY(0); }
     100% { transform: scale(1.05) translateY(-2px); }
 }
 
@@ -553,6 +199,8 @@ h1 {
     pointer-events: none;
 }
 
+.smoke::before { content: '💨'; font-size: 20px; }
+
 .candle.blown .flame {
     opacity: 0;
     animation: blowOut 0.3s forwards;
@@ -564,24 +212,13 @@ h1 {
 }
 
 @keyframes blowOut {
-    0% { transform: scale(1); opacity: 1; }
+    0%   { transform: scale(1); opacity: 1; }
     100% { transform: scale(0); opacity: 0; }
 }
 
 @keyframes smokeRise {
-    0% {
-        opacity: 0.8;
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-50px) scale(2);
-    }
-}
-
-.smoke::before {
-    content: '💨';
-    font-size: 20px;
+    0%   { opacity: 0.8; transform: translateX(-50%) translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-50px) scale(2); }
 }
 
 /* メッセージポップアップ */
@@ -600,6 +237,7 @@ h1 {
     z-index: 10001;
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
 }
 
 .message-popup.show {
@@ -607,172 +245,13 @@ h1 {
     opacity: 1;
 }
 
-/* 星の軌跡 */
-.star-trail {
-    position: fixed;
-    font-size: 20px;
-    pointer-events: none;
-    z-index: 9998;
-    animation: starFade 1s ease-out forwards;
-}
-
-@keyframes starFade {
-    0% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0) rotate(360deg);
-    }
-}
-
-/* ギフトボックス */
-.gift-box {
-    position: fixed;
-    bottom: 80px;
-    right: 30px;
-    width: 80px;
-    height: 100px;
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0) rotate(-180deg);
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 100;
-}
-
-.gift-box.show {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-    animation: giftBounce 2s infinite;
-}
-
-@keyframes giftBounce {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(5deg); }
-}
-
-.gift-body {
-    position: absolute;
-    bottom: 0;
-    width: 80px;
-    height: 60px;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    border-radius: 5px;
-}
-
-.gift-body::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 60px;
-    background: #ffd93d;
-}
-
-.gift-body::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 10px;
-    background: #ffd93d;
-}
-
-.gift-lid {
-    position: absolute;
-    top: 0;
-    width: 80px;
-    height: 30px;
-    background: linear-gradient(135deg, #4ecdc4 0%, #44a3a0 100%);
-    border-radius: 5px 5px 0 0;
-    transition: all 0.5s;
-}
-
-.gift-lid::before {
-    content: '🎀';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 30px;
-}
-
-.gift-box.opened .gift-lid {
-    transform: translateY(-50px) rotateX(45deg);
-    opacity: 0;
-}
-
-.gift-box.opened .gift-body {
-    animation: giftExplode 0.5s forwards;
-}
-
-@keyframes giftExplode {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(0); opacity: 0; }
-}
-
-.gift-message {
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #ff69b4;
-    white-space: nowrap;
-    animation: pulse 1.5s infinite;
-}
-
-/* スマホ最適化（モバイルファースト） */
+/* スマホ最適化 */
 @media only screen and (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-
-    h1 {
-        font-size: 2em;
-    }
-
-    .container {
-        padding: 15px;
-    }
-
-    .candles-container {
-        gap: 30px;
-        top: 12%;
-    }
-
-    .flame {
-        width: 18px;
-        height: 24px;
-    }
-
-    .gift-box {
-        bottom: 260px;
-        right: 15px;
-        width: 70px;
-        height: 90px;
-    }
-
-    .gift-body {
-        width: 70px;
-        height: 52px;
-    }
-
-    .gift-lid {
-        width: 70px;
-        height: 28px;
-    }
-
+    body { padding: 10px; }
+    h1 { font-size: 2em; }
+    .container { padding: 15px; }
+    .candles-container { gap: 30px; top: 12%; }
+    .flame { width: 18px; height: 24px; }
     .message-popup {
         padding: 25px 35px;
         font-size: 20px;
@@ -780,103 +259,10 @@ h1 {
         text-align: center;
         border-radius: 25px;
     }
-
-    .hint-button {
-        bottom: 15px;
-        right: 15px;
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-
-    .achievement-button {
-        bottom: 75px;
-        right: 15px;
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-
-    .achievement-notification {
-        padding: 15px 20px;
-        max-width: 85%;
-    }
-
-    .achievement-icon {
-        font-size: 36px;
-    }
-
-    .achievement-name {
-        font-size: 16px;
-    }
-
-    .achievement-modal-content {
-        padding: 20px;
-    }
-
-    .achievement-list-icon {
-        font-size: 30px;
-    }
-
-    .touch-hints {
-        bottom: 70px;
-        gap: 5px;
-    }
-
-    .hint-item {
-        font-size: 10px;
-        padding: 6px 12px;
-    }
 }
 
-/* 小さいスマホ用 */
 @media only screen and (max-width: 400px) {
-    h1 {
-        font-size: 1.8em;
-    }
-
-    .candles-container {
-        gap: 20px;
-    }
-
-    .flame {
-        width: 15px;
-        height: 20px;
-    }
-
-    .hint-button {
-        padding: 10px 15px;
-        font-size: 12px;
-    }
-
-    .hint-item {
-        font-size: 9px;
-        padding: 5px 10px;
-    }
-}
-
-/* 横画面対応 */
-@media only screen and (orientation: landscape) and (max-height: 500px) {
-    .hint-button {
-        bottom: 10px;
-        right: 10px;
-        padding: 8px 15px;
-        font-size: 12px;
-    }
-
-    .touch-hints {
-        flex-direction: row;
-        flex-wrap: wrap;
-        bottom: 50px;
-        max-width: 90%;
-    }
-
-    .hint-item {
-        font-size: 9px;
-        padding: 5px 8px;
-        flex: 1 1 45%;
-    }
-
-    .gift-box {
-        bottom: 80px;
-        right: 10px;
-    }
+    h1 { font-size: 1.8em; }
+    .candles-container { gap: 20px; }
+    .flame { width: 15px; height: 20px; }
 }
