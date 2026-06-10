@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useGiftName } from './hooks/useGiftName'
+import { useAgeParam } from './hooks/useAgeParam'
 import { useConfetti } from './hooks/useConfetti'
+import * as audio from './audio/audioManager'
 import Scene from './components/Scene'
 import CTAOverlay from './components/CTAOverlay'
 import MessageCard from './components/MessageCard'
+import MuteButton from './components/MuteButton'
 
 type AppState = 'idle' | 'blowing' | 'blown' | 'celebrated'
 
@@ -12,6 +15,7 @@ const HOLD_MS = 1400
 
 export default function App() {
   const name = useGiftName()
+  const age = useAgeParam()
   const { fireConfetti } = useConfetti()
 
   const [appState, setAppState] = useState<AppState>('idle')
@@ -21,6 +25,8 @@ export default function App() {
   const holdStartRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
   const celebrationTimerRef = useRef<number | null>(null)
+  const stopBlowingRef = useRef<(() => void) | null>(null)
+  const melodyCancelRef = useRef<(() => void) | null>(null)
 
   const cancelAnimation = useCallback(() => {
     if (rafRef.current !== null) {
@@ -35,6 +41,8 @@ export default function App() {
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
     cancelAnimation()
+    audio.unlock()
+    stopBlowingRef.current = audio.startBlowing()
     holdStartRef.current = performance.now()
     setAppState('blowing')
 
@@ -55,6 +63,11 @@ export default function App() {
       setProgress(1)
       setExtinguish(1)
       setAppState('blown')
+      stopBlowingRef.current?.()
+      stopBlowingRef.current = null
+      audio.playBlowOut()
+      audio.playConfettiPops()
+      melodyCancelRef.current = audio.playMelody()
       fireConfetti()
       celebrationTimerRef.current = window.setTimeout(() => {
         setAppState('celebrated')
@@ -69,50 +82,73 @@ export default function App() {
 
     holdStartRef.current = null
     cancelAnimation()
+    stopBlowingRef.current?.()
+    stopBlowingRef.current = null
     setAppState('idle')
     setProgress(0)
     setExtinguish(0)
   }, [appState, cancelAnimation])
 
+  const replay = useCallback(() => {
+    melodyCancelRef.current?.()
+    melodyCancelRef.current = null
+    if (celebrationTimerRef.current !== null) {
+      window.clearTimeout(celebrationTimerRef.current)
+      celebrationTimerRef.current = null
+    }
+    cancelAnimation()
+    audio.playRelight()
+    setProgress(0)
+    setAppState('idle')
+
+    // 炎をゆっくり復活させる（extinguish 1 → 0）
+    const RELIGHT_MS = 700
+    const start = performance.now()
+    const tick = () => {
+      const k = Math.min((performance.now() - start) / RELIGHT_MS, 1)
+      setExtinguish(1 - k)
+      rafRef.current = k < 1 ? requestAnimationFrame(tick) : null
+    }
+    rafRef.current = requestAnimationFrame(tick)
+  }, [cancelAnimation])
+
   useEffect(() => {
     return () => {
       cancelAnimation()
+      stopBlowingRef.current?.()
+      melodyCancelRef.current?.()
       if (celebrationTimerRef.current !== null) {
         window.clearTimeout(celebrationTimerRef.current)
       }
     }
   }, [cancelAnimation])
 
-  const isInteractive = appState === 'idle' || appState === 'blowing'
-
   return (
     <div
       className="relative w-screen h-screen overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' }}
+      style={{
+        background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+        touchAction: 'none',
+      }}
+      onPointerDown={startHold}
+      onPointerUp={cancelHold}
+      onPointerCancel={cancelHold}
     >
       <Canvas
         gl={{ alpha: true, antialias: true }}
         camera={{ position: [0, 0.8, 6.5], fov: 52 }}
         style={{ position: 'absolute', inset: 0 }}
       >
-        <Scene extinguish={extinguish} />
+        <Scene extinguish={extinguish} candleCount={age ?? undefined} />
       </Canvas>
 
-      {isInteractive && (
-        <div
-          className="absolute inset-0"
-          onPointerDown={startHold}
-          onPointerUp={cancelHold}
-          onPointerCancel={cancelHold}
-          style={{ touchAction: 'none' }}
-        />
-      )}
+      <MuteButton />
 
       {appState === 'idle' && <CTAOverlay />}
 
       {appState === 'blowing' && <BlowProgress progress={progress} />}
 
-      {appState === 'celebrated' && <MessageCard name={name} />}
+      {appState === 'celebrated' && <MessageCard name={name} age={age} onReplay={replay} />}
     </div>
   )
 }

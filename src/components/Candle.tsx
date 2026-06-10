@@ -7,9 +7,10 @@ interface Props {
   position: [number, number, number]
   extinguish: number
   color?: string
+  withLight?: boolean
 }
 
-export default function Candle({ position, extinguish, color = '#ffeaa7' }: Props) {
+export default function Candle({ position, extinguish, color = '#ffeaa7', withLight = true }: Props) {
   const lightRef = useRef<THREE.PointLight>(null)
 
   useFrame(({ clock }) => {
@@ -35,13 +36,15 @@ export default function Candle({ position, extinguish, color = '#ffeaa7' }: Prop
       {/* Flame + glow — positioned at wick tip */}
       <group position={[0, 0.30, 0]}>
         <Flame extinguish={extinguish} />
-        <pointLight
-          ref={lightRef}
-          color="#ff9922"
-          intensity={(1 - extinguish) * 1.7}
-          distance={3.5}
-          decay={2}
-        />
+        {withLight && (
+          <pointLight
+            ref={lightRef}
+            color="#ff9922"
+            intensity={(1 - extinguish) * 1.7}
+            distance={3.5}
+            decay={2}
+          />
+        )}
       </group>
     </group>
   )

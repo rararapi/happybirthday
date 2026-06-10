@@ -2,12 +2,15 @@ import { Stars, OrbitControls } from '@react-three/drei'
 import BirthdayCake from './BirthdayCake'
 import Table from './Table'
 import Balloons from './Balloons'
+import GiftBoxes from './GiftBoxes'
+import Bunting from './Bunting'
 
 interface Props {
   extinguish: number
+  candleCount?: number
 }
 
-export default function Scene({ extinguish }: Props) {
+export default function Scene({ extinguish, candleCount }: Props) {
   return (
     <>
       <Stars radius={100} depth={65} count={3600} factor={4.6} saturation={0.35} fade speed={0.9} />
@@ -25,8 +28,10 @@ export default function Scene({ extinguish }: Props) {
       <pointLight position={[0, 4, 2]} color="#ffd700" intensity={0.5} distance={10} decay={2} />
 
       <Table />
-      <BirthdayCake extinguish={extinguish} />
+      <BirthdayCake extinguish={extinguish} candleCount={candleCount} />
       <Balloons />
+      <GiftBoxes />
+      <Bunting />
 
       <OrbitControls
         autoRotate

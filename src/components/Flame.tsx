@@ -136,10 +136,10 @@ export default function Flame({ extinguish }: Props) {
     })
   })
 
-  if (extinguish >= 1) return null
-
+  // extinguish >= 1 でも unmount せず visible フラグで制御する
+  // （リプレイで extinguish が 1 → 0 に戻るとき再マウントのチラつきを避ける）
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} visible={extinguish < 1}>
       {[0, Math.PI / 2].map((rotation, index) => (
         <mesh key={`outer-${rotation}`} rotation={[0, rotation, 0]}>
           <planeGeometry args={[1, 1, 18, 28]} />
