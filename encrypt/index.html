@@ -3,17 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Birthday URL Generator</title>
+    <title>Happy Birthday — 使い方ガイド & URL作成</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="encrypt.js"></script>
+    <script src="encrypt.js" defer></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #f1f0f7;
+            min-height: 100vh;
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.7rem;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #b9b4d6;
+            margin: 0 0 40px;
+            font-size: 0.95rem;
+        }
+        section {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+        h2 {
+            font-size: 1.15rem;
+            margin: 0 0 16px;
+            color: #ffd966;
+        }
+        ul, ol { padding-left: 1.4em; margin: 0; }
+        li { margin-bottom: 8px; }
+        li:last-child { margin-bottom: 0; }
+        code {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            vertical-align: top;
+        }
+        th { color: #b9b4d6; font-weight: 600; white-space: nowrap; }
+        label {
+            display: block;
+            font-size: 0.92rem;
+            color: #b9b4d6;
+            margin: 18px 0 6px;
+        }
+        label:first-of-type { margin-top: 0; }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.25);
+            color: #f1f0f7;
+            outline: none;
+        }
+        input:focus { border-color: #ffd966; }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            font-size: 0.92rem;
+        }
+        .checkbox-row input { width: 18px; height: 18px; accent-color: #ffd966; }
+        .hint { font-size: 0.8rem; color: #8f89b3; margin: 4px 0 0; }
+        button.primary {
+            display: block;
+            width: 100%;
+            margin-top: 24px;
+            padding: 13px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffd966, #ff9f43);
+            color: #2d2a4a;
+            cursor: pointer;
+        }
+        button.primary:hover { filter: brightness(1.08); }
+        .result {
+            display: none;
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 217, 102, 0.4);
+        }
+        .result.visible { display: block; }
+        .result a {
+            color: #7ec8ff;
+            word-break: break-all;
+            font-size: 0.92rem;
+        }
+        .result-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .result-buttons button, .result-buttons a.open {
+            flex: 1;
+            padding: 9px;
+            font-size: 0.92rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f0f7;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+        .result-buttons button:hover, .result-buttons a.open:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .error { color: #ff8a8a; margin-top: 14px; font-size: 0.92rem; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Birthday URL Generator</h1>
-        <label for="name">Name</label>
-        <input type="text" id="name" placeholder="birthday person's name">
-        <button type="button" onclick="generateURL()">Generate URL</button>
-        <p id="encryptedURL"></p>
+        <h1>🎂 Happy Birthday</h1>
+        <p class="subtitle">使い方ガイド &amp; お祝いURL作成ページ</p>
+
+        <section>
+            <h2>このアプリについて</h2>
+            <p style="margin:0">
+                誕生日の人に贈る、3Dバースデーケーキのお祝いページです。
+                名前や年齢を入れたURLを作って送ると、相手はろうそくを吹き消して
+                メッセージを受け取れます。
+            </p>
+        </section>
+
+        <section>
+            <h2>遊び方</h2>
+            <ol>
+                <li>送られてきたURLを開くと、ろうそくの灯ったケーキが表示されます。</li>
+                <li><strong>画面を長押し</strong>すると、息を吹きかけるようにろうそくの火が小さくなっていきます。</li>
+                <li>火が消えると紙吹雪とメロディでお祝いされ、メッセージカードが表示されます。</li>
+                <li>浮かんでいる<strong>風船はタップで割れます</strong>。しばらくすると戻ってきます。</li>
+                <li>メッセージカードの<strong>リプレイボタン</strong>でろうそくを灯し直して、もう一度遊べます。</li>
+                <li>右上のボタンで<strong>音のオン・オフ</strong>を切り替えられます。</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>URLパラメータ</h2>
+            <table>
+                <tr>
+                    <th><code>name</code></th>
+                    <td>お祝いする人の名前（そのまま表示されます）。<br>例: <code>?name=さくら</code></td>
+                </tr>
+                <tr>
+                    <th><code>n_enc</code></th>
+                    <td>暗号化された名前。URLを見ても名前が分からないようにしたいときに使います。下のフォームで生成できます。</td>
+                </tr>
+                <tr>
+                    <th><code>age</code></th>
+                    <td>年齢（1〜30の整数）。ケーキのろうそくの本数になります。<br>例: <code>?name=さくら&amp;age=7</code></td>
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>お祝いURLを作る</h2>
+            <label for="name">名前</label>
+            <input type="text" id="name" placeholder="例: さくら" autocomplete="off">
+            <p class="hint">空欄の場合は名前なしのメッセージになります。</p>
+
+            <label for="age">年齢（ろうそくの本数 / 1〜30）</label>
+            <input type="number" id="age" min="1" max="30" step="1" placeholder="例: 7">
+            <p class="hint">空欄の場合は標準のろうそく配置になります。</p>
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="encryptName" checked>
+                <label for="encryptName" style="margin:0; color:#f1f0f7;">名前を暗号化する（URLから名前が読めなくなります）</label>
+            </div>
+
+            <button type="button" class="primary" onclick="generateURL()">URLを生成</button>
+
+            <p id="errorMessage" class="error" hidden></p>
+
+            <div id="resultBox" class="result">
+                <a id="resultLink" href="#" target="_blank" rel="noopener"></a>
+                <div class="result-buttons">
+                    <button type="button" id="copyButton" onclick="copyURL()">コピー</button>
+                    <a id="openLink" class="open" href="#" target="_blank" rel="noopener">開いて確認</a>
+                </div>
+            </div>
+        </section>
     </div>
 </body>
 </html>

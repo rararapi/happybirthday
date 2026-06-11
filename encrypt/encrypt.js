@@ -3,15 +3,10 @@ const repositoryName = 'happybirthday'
 const keyText = '12345678901234567890123456789012'
 const ivText = '1234567890123456'
 
-function generateURL() {
-  const result = document.getElementById('encryptedURL')
-  const name = document.getElementById('name').value.trim()
+const MIN_AGE = 1
+const MAX_AGE = 30
 
-  if (!name) {
-    result.textContent = 'Name is required.'
-    return
-  }
-
+function encryptNameValue(name) {
   const key = CryptoJS.enc.Utf8.parse(keyText)
   const iv = CryptoJS.enc.Utf8.parse(ivText)
   const encryptedData = CryptoJS.AES.encrypt(name, key, {
@@ -20,21 +15,75 @@ function generateURL() {
     padding: CryptoJS.pad.Pkcs7,
   })
 
-  const base64Encoded = CryptoJS.enc.Base64.stringify(encryptedData.ciphertext)
-  const base64UrlEncoded = base64Encoded
+  return CryptoJS.enc.Base64.stringify(encryptedData.ciphertext)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '')
+}
 
-  let basePath = window.location.origin
+function basePath() {
+  let base = window.location.origin
   if (window.location.hostname === githubHostname) {
-    basePath += '/' + repositoryName
+    base += '/' + repositoryName
+  }
+  return base
+}
+
+function showError(message) {
+  const error = document.getElementById('errorMessage')
+  error.textContent = message
+  error.hidden = false
+  document.getElementById('resultBox').classList.remove('visible')
+}
+
+function generateURL() {
+  const error = document.getElementById('errorMessage')
+  error.hidden = true
+
+  const name = document.getElementById('name').value.trim()
+  const ageRaw = document.getElementById('age').value.trim()
+  const encrypt = document.getElementById('encryptName').checked
+
+  const params = new URLSearchParams()
+
+  if (name) {
+    if (encrypt) {
+      params.set('n_enc', encryptNameValue(name))
+    } else {
+      params.set('name', name)
+    }
   }
 
-  const url = `${basePath}/?n_enc=${base64UrlEncoded}`
-  const link = document.createElement('a')
+  if (ageRaw) {
+    const age = Number(ageRaw)
+    if (!Number.isInteger(age) || age < MIN_AGE || age > MAX_AGE) {
+      showError(`年齢は ${MIN_AGE}〜${MAX_AGE} の整数で入力してください。`)
+      return
+    }
+    params.set('age', String(age))
+  }
+
+  const query = params.toString()
+  const url = `${basePath()}/${query ? '?' + query : ''}`
+
+  const link = document.getElementById('resultLink')
   link.href = url
   link.textContent = url
+  document.getElementById('openLink').href = url
 
-  result.replaceChildren(link)
+  const copyButton = document.getElementById('copyButton')
+  copyButton.textContent = 'コピー'
+
+  document.getElementById('resultBox').classList.add('visible')
+}
+
+async function copyURL() {
+  const url = document.getElementById('resultLink').href
+  const copyButton = document.getElementById('copyButton')
+  try {
+    await navigator.clipboard.writeText(url)
+    copyButton.textContent = 'コピーしました ✓'
+  } catch {
+    copyButton.textContent = 'コピーできませんでした'
+  }
 }
