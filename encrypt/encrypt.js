@@ -4,7 +4,7 @@ const keyText = '12345678901234567890123456789012'
 const ivText = '1234567890123456'
 
 const MIN_AGE = 1
-const MAX_AGE = 30
+const MAX_AGE = 200
 
 function encryptNameValue(name) {
   const key = CryptoJS.enc.Utf8.parse(keyText)

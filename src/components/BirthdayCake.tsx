@@ -182,11 +182,17 @@ function CakeDecorations() {
 
 // ろうそくリング定義（上から順に埋める）
 // y はろうそく中心: 段上面 + 0.05（めり込み余白）+ 0.25（ろうそく半分の高さ）
+// 先頭4リングは従来配置（30本まで見た目を維持）。以降は大人数用のオーバーフローリング。
 const CANDLE_RINGS = [
   { radius: 0, y: tierTopY(TIERS[2]) + 0.3, capacity: 1, angleOffset: 0 }, // 上段中央
   { radius: TIERS[2].radius * 0.58, y: tierTopY(TIERS[2]) + 0.3, capacity: 6, angleOffset: 0 }, // 上段リング
   { radius: 0.9, y: tierTopY(TIERS[1]) + 0.3, capacity: 10, angleOffset: 0.3 }, // 中段リング
   { radius: 1.2, y: tierTopY(TIERS[0]) + 0.3, capacity: 13, angleOffset: 0.15 }, // 下段リング
+  { radius: 0.65, y: tierTopY(TIERS[2]) + 0.3, capacity: 25, angleOffset: 0.12 }, // 上段外周
+  { radius: 0.26, y: tierTopY(TIERS[2]) + 0.3, capacity: 10, angleOffset: 0.5 }, // 上段内周
+  { radius: 1.02, y: tierTopY(TIERS[1]) + 0.3, capacity: 36, angleOffset: 0.1 }, // 中段外周
+  { radius: 1.38, y: tierTopY(TIERS[0]) + 0.3, capacity: 50, angleOffset: 0.07 }, // 下段外周
+  { radius: 1.55, y: 0.3, capacity: 55, angleOffset: 0.05 }, // お皿の縁（皿上面 y=0 基準）
 ];
 
 export const MAX_CANDLES = CANDLE_RINGS.reduce((sum, r) => sum + r.capacity, 0);
