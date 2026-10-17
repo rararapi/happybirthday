@@ -209,6 +209,42 @@ export function playRelight() {
   noise.stop(now + 0.05)
 }
 
+// 部屋の照明スイッチの「カチッ」
+export function playLightSwitch() {
+  if (!ready() || !ctx || !masterGain) return
+  const audio = ctx
+  const dest = masterGain
+  const now = audio.currentTime
+
+  const clickAt = (t: number, level: number) => {
+    const noise = makeNoise(audio, false)
+    const bp = audio.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.value = 3200
+    bp.Q.value = 2
+    const gain = audio.createGain()
+    gain.gain.setValueAtTime(level, t)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025)
+    noise.connect(bp).connect(gain).connect(dest)
+    noise.start(t)
+    noise.stop(t + 0.04)
+  }
+  clickAt(now, 0.35)
+  clickAt(now + 0.035, 0.18)
+
+  // 低い「コトッ」
+  const osc = audio.createOscillator()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(180, now)
+  osc.frequency.exponentialRampToValueAtTime(70, now + 0.06)
+  const oGain = audio.createGain()
+  oGain.gain.setValueAtTime(0.18, now)
+  oGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
+  osc.connect(oGain).connect(dest)
+  osc.start(now)
+  osc.stop(now + 0.1)
+}
+
 // Happy Birthday メロディ（ハ長調 3/4、オルゴール風）
 // [周波数, 拍数]
 const MELODY: Array<[number, number]> = [

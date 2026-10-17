@@ -1,3 +1,5 @@
+import { GiftShadow, TABLE_TOP_Y } from './Table'
+
 interface GiftConfig {
   angle: number
   radius: number
@@ -24,35 +26,39 @@ function GiftBox({ angle, radius, size, rotY, boxColor, ribbonColor }: GiftConfi
       position={[Math.cos(rad) * radius, h / 2, Math.sin(rad) * radius]}
       rotation={[0, rotY, 0]}
     >
+      <group position={[0, -h / 2, 0]}>
+        <GiftShadow size={Math.max(w, d) * 2.2} />
+      </group>
+
       {/* 箱本体 */}
-      <mesh>
+      <mesh castShadow>
         <boxGeometry args={[w, h, d]} />
-        <meshStandardMaterial color={boxColor} emissive={boxColor} emissiveIntensity={0.15} roughness={0.5} />
+        <meshStandardMaterial color={boxColor} roughness={0.5} />
       </mesh>
 
       {/* 交差リボン */}
       <mesh>
         <boxGeometry args={[w * 1.02, h * 1.02, ribbonW]} />
-        <meshStandardMaterial color={ribbonColor} emissive={ribbonColor} emissiveIntensity={0.2} roughness={0.4} />
+        <meshStandardMaterial color={ribbonColor} roughness={0.4} />
       </mesh>
       <mesh>
         <boxGeometry args={[ribbonW, h * 1.02, d * 1.02]} />
-        <meshStandardMaterial color={ribbonColor} emissive={ribbonColor} emissiveIntensity={0.2} roughness={0.4} />
+        <meshStandardMaterial color={ribbonColor} roughness={0.4} />
       </mesh>
 
       {/* リボン結び */}
       <group position={[0, h / 2 + 0.04, 0]}>
         <mesh position={[-0.06, 0, 0]} scale={[1.4, 0.7, 0.9]}>
           <sphereGeometry args={[0.055, 8, 6]} />
-          <meshStandardMaterial color={ribbonColor} emissive={ribbonColor} emissiveIntensity={0.2} roughness={0.4} />
+          <meshStandardMaterial color={ribbonColor} roughness={0.4} />
         </mesh>
         <mesh position={[0.06, 0, 0]} scale={[1.4, 0.7, 0.9]}>
           <sphereGeometry args={[0.055, 8, 6]} />
-          <meshStandardMaterial color={ribbonColor} emissive={ribbonColor} emissiveIntensity={0.2} roughness={0.4} />
+          <meshStandardMaterial color={ribbonColor} roughness={0.4} />
         </mesh>
         <mesh>
           <sphereGeometry args={[0.04, 8, 6]} />
-          <meshStandardMaterial color={ribbonColor} emissive={ribbonColor} emissiveIntensity={0.25} roughness={0.4} />
+          <meshStandardMaterial color={ribbonColor} roughness={0.4} />
         </mesh>
       </group>
     </group>
@@ -62,7 +68,7 @@ function GiftBox({ angle, radius, size, rotY, boxColor, ribbonColor }: GiftConfi
 // テーブルクロス上（ケーキ皿の外側）に置かれたプレゼント箱
 export default function GiftBoxes() {
   return (
-    <group position={[0, -1.92, 0]}>
+    <group position={[0, TABLE_TOP_Y, 0]}>
       {GIFTS.map((g, i) => (
         <GiftBox key={i} {...g} />
       ))}

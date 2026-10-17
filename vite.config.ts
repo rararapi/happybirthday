@@ -5,13 +5,12 @@ export default defineConfig({
   plugins: [react()],
   base: '/happybirthday/',
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1100,
     rollupOptions: {
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
           'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
-          'vendor-postprocessing': ['postprocessing', '@react-three/postprocessing'],
         },
       },
     },

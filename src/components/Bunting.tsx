@@ -43,14 +43,12 @@ function Garland({ start, end, sagY, flags }: GarlandConfig) {
   return (
     <group>
       <mesh geometry={tubeGeometry}>
-        <meshStandardMaterial color="#f5f0ff" emissive="#f5f0ff" emissiveIntensity={0.15} roughness={0.8} />
+        <meshStandardMaterial color="#f5f0ff" roughness={0.8} />
       </mesh>
       {flagPoints.map((p, i) => (
         <mesh key={i} geometry={flagGeometry} position={[p.x, p.y - 0.02, p.z]}>
           <meshStandardMaterial
             color={FLAG_COLORS[i % FLAG_COLORS.length]}
-            emissive={FLAG_COLORS[i % FLAG_COLORS.length]}
-            emissiveIntensity={0.2}
             roughness={0.6}
             side={THREE.DoubleSide}
           />

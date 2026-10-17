@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { PerformanceMonitor } from '@react-three/drei'
+import * as THREE from 'three'
 import { useGiftName } from './hooks/useGiftName'
 import { useAgeParam } from './hooks/useAgeParam'
 import { useConfetti } from './hooks/useConfetti'
 import * as audio from './audio/audioManager'
+import { blowState, DARK_PAUSE_SEC, nowSec } from './state/blowState'
 import Scene from './components/Scene'
 import CTAOverlay from './components/CTAOverlay'
 import MessageCard from './components/MessageCard'
@@ -12,6 +15,11 @@ import MuteButton from './components/MuteButton'
 type AppState = 'idle' | 'blowing' | 'blown' | 'celebrated'
 
 const HOLD_MS = 1400
+const MESSAGE_DELAY_MS = 2200
+
+// 影マップはスマホでは重いので、精密なポインタの端末（PC）のみ有効にする
+const ENABLE_SHADOWS = !window.matchMedia('(pointer: coarse)').matches
+const INITIAL_DPR = Math.min(window.devicePixelRatio || 1, 1.75)
 
 export default function App() {
   const name = useGiftName()
@@ -19,12 +27,13 @@ export default function App() {
   const { fireConfetti } = useConfetti()
 
   const [appState, setAppState] = useState<AppState>('idle')
-  const [extinguish, setExtinguish] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [dpr, setDpr] = useState(INITIAL_DPR)
 
   const holdStartRef = useRef<number | null>(null)
+  const progressRef = useRef(0)
   const rafRef = useRef<number | null>(null)
-  const celebrationTimerRef = useRef<number | null>(null)
+  const timersRef = useRef<number[]>([])
   const stopBlowingRef = useRef<(() => void) | null>(null)
   const melodyCancelRef = useRef<(() => void) | null>(null)
 
@@ -35,6 +44,15 @@ export default function App() {
     }
   }, [])
 
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((id) => window.clearTimeout(id))
+    timersRef.current = []
+  }, [])
+
+  const later = useCallback((ms: number, fn: () => void) => {
+    timersRef.current.push(window.setTimeout(fn, ms))
+  }, [])
+
   const startHold = useCallback((event: PointerEvent<HTMLDivElement>) => {
     if (appState !== 'idle') return
 
@@ -43,15 +61,18 @@ export default function App() {
     cancelAnimation()
     audio.unlock()
     stopBlowingRef.current = audio.startBlowing()
-    holdStartRef.current = performance.now()
+    // 途中で指を離して消えたろうそくは消えたまま。続きから吹き消す
+    holdStartRef.current = performance.now() - progressRef.current * HOLD_MS
+    blowState.blowing = true
     setAppState('blowing')
 
     const tick = () => {
       if (holdStartRef.current === null) return
 
       const nextProgress = Math.min((performance.now() - holdStartRef.current) / HOLD_MS, 1)
+      progressRef.current = nextProgress
+      blowState.extinguish = nextProgress
       setProgress(nextProgress)
-      setExtinguish(nextProgress)
 
       if (nextProgress < 1) {
         rafRef.current = requestAnimationFrame(tick)
@@ -60,91 +81,90 @@ export default function App() {
 
       holdStartRef.current = null
       rafRef.current = null
-      setProgress(1)
-      setExtinguish(1)
+      blowState.blowing = false
+      blowState.blownAt = nowSec()
       setAppState('blown')
       stopBlowingRef.current?.()
       stopBlowingRef.current = null
       audio.playBlowOut()
-      audio.playConfettiPops()
-      melodyCancelRef.current = audio.playMelody()
-      fireConfetti()
-      celebrationTimerRef.current = window.setTimeout(() => {
-        setAppState('celebrated')
-      }, 1600)
+
+      // 暗転 → 部屋の明かりが点いてお祝い
+      later(DARK_PAUSE_SEC * 1000, () => {
+        audio.playLightSwitch()
+        audio.playConfettiPops()
+        melodyCancelRef.current = audio.playMelody()
+        fireConfetti()
+      })
+      later(MESSAGE_DELAY_MS, () => setAppState('celebrated'))
     }
 
     rafRef.current = requestAnimationFrame(tick)
-  }, [appState, cancelAnimation, fireConfetti])
+  }, [appState, cancelAnimation, fireConfetti, later])
 
   const cancelHold = useCallback(() => {
     if (appState !== 'blowing' || holdStartRef.current === null) return
 
     holdStartRef.current = null
+    blowState.blowing = false
     cancelAnimation()
     stopBlowingRef.current?.()
     stopBlowingRef.current = null
     setAppState('idle')
-    setProgress(0)
-    setExtinguish(0)
   }, [appState, cancelAnimation])
 
   const replay = useCallback(() => {
     melodyCancelRef.current?.()
     melodyCancelRef.current = null
-    if (celebrationTimerRef.current !== null) {
-      window.clearTimeout(celebrationTimerRef.current)
-      celebrationTimerRef.current = null
-    }
+    clearTimers()
     cancelAnimation()
     audio.playRelight()
+    blowState.blownAt = -1
+    progressRef.current = 0
     setProgress(0)
     setAppState('idle')
 
     // 炎をゆっくり復活させる（extinguish 1 → 0）
-    const RELIGHT_MS = 700
+    const RELIGHT_MS = 900
     const start = performance.now()
     const tick = () => {
       const k = Math.min((performance.now() - start) / RELIGHT_MS, 1)
-      setExtinguish(1 - k)
+      blowState.extinguish = 1 - k
       rafRef.current = k < 1 ? requestAnimationFrame(tick) : null
     }
     rafRef.current = requestAnimationFrame(tick)
-  }, [cancelAnimation])
+  }, [cancelAnimation, clearTimers])
 
   useEffect(() => {
     return () => {
       cancelAnimation()
+      clearTimers()
       stopBlowingRef.current?.()
       melodyCancelRef.current?.()
-      if (celebrationTimerRef.current !== null) {
-        window.clearTimeout(celebrationTimerRef.current)
-      }
     }
-  }, [cancelAnimation])
+  }, [cancelAnimation, clearTimers])
 
   return (
     <div
       className="relative w-screen h-screen overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-        touchAction: 'none',
-      }}
+      style={{ background: '#070504', touchAction: 'none' }}
       onPointerDown={startHold}
       onPointerUp={cancelHold}
       onPointerCancel={cancelHold}
     >
       <Canvas
-        gl={{ alpha: true, antialias: true }}
-        camera={{ position: [0, 0.8, 6.5], fov: 52 }}
+        shadows={ENABLE_SHADOWS ? { type: THREE.PCFSoftShadowMap } : false}
+        dpr={dpr}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        camera={{ position: [0, 2, 9], fov: 40, near: 0.1, far: 80 }}
         style={{ position: 'absolute', inset: 0 }}
       >
-        <Scene extinguish={extinguish} candleCount={age ?? undefined} />
+        <PerformanceMonitor onDecline={() => setDpr(1)} />
+        <Scene candleCount={age ?? undefined} shadows={ENABLE_SHADOWS} />
       </Canvas>
 
       <MuteButton />
 
-      {appState === 'idle' && <CTAOverlay />}
+      {appState === 'idle' && <CTAOverlay resumed={progress > 0} />}
 
       {appState === 'blowing' && <BlowProgress progress={progress} />}
 

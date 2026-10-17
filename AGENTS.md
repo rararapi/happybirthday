@@ -26,13 +26,13 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 
 - `index.html` - Vite HTML entry.
 - `src/main.tsx` - React entry point.
-- `src/App.tsx` - Main app state, long-press candle extinguish interaction, and message display flow.
-- `src/components/Scene.tsx` - Three.js scene composition, background stars, and lighting.
-- `src/components/BirthdayCake.tsx` - Cake and candle placement.
-- `src/components/Candle.tsx` - Candle mesh, flame, and flame light.
-- `src/components/Flame.tsx` - Shader-based animated flame.
+- `src/App.tsx` - Main app state, long-press candle extinguish interaction, celebration timeline, and message display flow.
+- `src/state/blowState.ts` - Mutable per-frame animation state (extinguish, blow strength, room light). Read it inside `useFrame`; do not move it into React state.
+- `src/components/Scene.tsx` - Scene composition, dark-room/room lighting, camera rig, and background bokeh.
+- `src/components/BirthdayCake.tsx` - Procedural cake (lathe tiers, piping, strawberries, plate) and candle placement.
+- `src/components/Candles.tsx` - Instanced candles, shader flames, glow halos, embers, smoke, and the aggregated candle light.
 - `src/components/Balloons.tsx` - 3D balloons.
-- `src/components/Table.tsx` - Cake table.
+- `src/components/Table.tsx` - Tablecloth and blob shadows.
 - `src/components/CTAOverlay.tsx` - Initial instruction overlay.
 - `src/components/MessageCard.tsx` - Final birthday message.
 - `src/hooks/useGiftName.ts` - URL name parsing and decryption.
@@ -50,8 +50,8 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 1. App starts in `idle`.
 2. User long-presses the screen.
 3. While holding, `progress` drives `extinguish` from `0` to `1`.
-4. The flame shrinks toward the wick while continuing to animate.
-5. At completion, the app fires confetti and transitions to the message card.
+4. Candles go out front-to-back as `extinguish` passes each candle's threshold; flames lean while blowing, then leave smoke and embers. Releasing early keeps extinguished candles out and resumes from the same progress.
+5. At completion the room stays dark briefly (`DARK_PAUSE_SEC`), then room lights come on with confetti and music, followed by the message card.
 
 ## Agent Rules
 
@@ -59,4 +59,5 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 - Preserve support for `?name=`, `?n_enc=`, and `?n_cnt=`.
 - Do not reintroduce the old DOM implementation files: `script.js`, `style.css`, `three-scene.js`, or `birthday-cake.png`.
 - Avoid adding postprocessing bloom unless black rendering issues are explicitly re-tested.
+- Glow is faked with additive halo sprites in `Candles.tsx`; keep candle rendering instanced so `?age=200` stays fast on phones.
 - Prefer small, focused visual changes and verify with `npm run build`.
