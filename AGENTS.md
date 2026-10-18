@@ -32,6 +32,7 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 - `src/components/BirthdayCake.tsx` - Procedural cake (lathe tiers, piping, strawberries, plate) and candle placement.
 - `src/components/Candles.tsx` - Instanced candles, shader flames, glow halos, embers, smoke, and the aggregated candle light.
 - `src/components/Balloons.tsx` - 3D balloons.
+- `src/components/Characters.tsx` - Procedural plush characters (bear, rabbit, chick) that pop in when the room lights come on and clap; `applauseTimes()` syncs the synthesized applause to their claps.
 - `src/components/Table.tsx` - Tablecloth and blob shadows.
 - `src/components/CTAOverlay.tsx` - Initial instruction overlay.
 - `src/components/MessageCard.tsx` - Final birthday message.
@@ -51,7 +52,7 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 2. User long-presses the screen.
 3. While holding, `progress` drives `extinguish` from `0` to `1`.
 4. Candles go out front-to-back as `extinguish` passes each candle's threshold; flames lean while blowing, then leave smoke and embers. Releasing early keeps extinguished candles out and resumes from the same progress.
-5. At completion the room stays dark briefly (`DARK_PAUSE_SEC`), then room lights come on with confetti and music, followed by the message card.
+5. At completion the room stays dark briefly (`DARK_PAUSE_SEC`), then room lights come on with confetti, music, and clapping characters, followed by the message card.
 
 ## Agent Rules
 

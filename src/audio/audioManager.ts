@@ -320,3 +320,48 @@ export function playMelody(): () => void {
     bus.disconnect()
   }
 }
+
+// キャラクターの拍手「パチパチ」。times は今からの各拍手の時刻（秒）。キャンセル関数を返す
+export function playApplause(times: number[]): () => void {
+  if (!ready() || !ctx || !masterGain) return () => {}
+  const audio = ctx
+  const now = audio.currentTime
+
+  const bus = audio.createGain()
+  bus.gain.value = 0.5
+  bus.connect(masterGain)
+
+  const nodes: Array<AudioBufferSourceNode> = []
+  for (const offset of times) {
+    const t = now + offset
+    const noise = makeNoise(audio, false)
+    const bp = audio.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.value = 1100 + Math.random() * 1100
+    bp.Q.value = 1.4
+    const gain = audio.createGain()
+    gain.gain.setValueAtTime(0.0001, t)
+    gain.gain.linearRampToValueAtTime(0.2 + Math.random() * 0.12, t + 0.002)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05 + Math.random() * 0.03)
+    noise.connect(bp).connect(gain).connect(bus)
+    // バッファ内の再生位置をずらして毎回違う音にする
+    noise.start(t, Math.random() * 0.9)
+    noise.stop(t + 0.1)
+    nodes.push(noise)
+  }
+
+  let cancelled = false
+  return () => {
+    if (cancelled) return
+    cancelled = true
+    nodes.forEach((n) => {
+      try {
+        n.stop()
+      } catch {
+        // 既に停止済みなら無視
+      }
+      n.disconnect()
+    })
+    bus.disconnect()
+  }
+}

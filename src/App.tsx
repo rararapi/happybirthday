@@ -11,6 +11,7 @@ import Scene from './components/Scene'
 import CTAOverlay from './components/CTAOverlay'
 import MessageCard from './components/MessageCard'
 import MuteButton from './components/MuteButton'
+import { applauseTimes } from './components/Characters'
 
 type AppState = 'idle' | 'blowing' | 'blown' | 'celebrated'
 
@@ -36,6 +37,7 @@ export default function App() {
   const timersRef = useRef<number[]>([])
   const stopBlowingRef = useRef<(() => void) | null>(null)
   const melodyCancelRef = useRef<(() => void) | null>(null)
+  const applauseCancelRef = useRef<(() => void) | null>(null)
 
   const cancelAnimation = useCallback(() => {
     if (rafRef.current !== null) {
@@ -93,6 +95,7 @@ export default function App() {
         audio.playLightSwitch()
         audio.playConfettiPops()
         melodyCancelRef.current = audio.playMelody()
+        applauseCancelRef.current = audio.playApplause(applauseTimes())
         fireConfetti()
       })
       later(MESSAGE_DELAY_MS, () => setAppState('celebrated'))
@@ -115,6 +118,8 @@ export default function App() {
   const replay = useCallback(() => {
     melodyCancelRef.current?.()
     melodyCancelRef.current = null
+    applauseCancelRef.current?.()
+    applauseCancelRef.current = null
     clearTimers()
     cancelAnimation()
     audio.playRelight()
@@ -140,6 +145,7 @@ export default function App() {
       clearTimers()
       stopBlowingRef.current?.()
       melodyCancelRef.current?.()
+      applauseCancelRef.current?.()
     }
   }, [cancelAnimation, clearTimers])
 

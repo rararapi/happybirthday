@@ -7,6 +7,7 @@ import Table from './Table'
 import Balloons from './Balloons'
 import GiftBoxes from './GiftBoxes'
 import Bunting from './Bunting'
+import Characters from './Characters'
 import { blowState, DARK_PAUSE_SEC, nowSec } from '../state/blowState'
 
 const DARK_BG = new THREE.Color('#070504')
@@ -199,6 +200,7 @@ function Scene({ candleCount, shadows }: Props) {
       <Balloons />
       <GiftBoxes />
       <Bunting />
+      <Characters castShadows={shadows} />
     </>
   )
 }
