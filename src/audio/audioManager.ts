@@ -32,6 +32,11 @@ export function unlock() {
   void ctx.resume()
 }
 
+// マイク入力の解析用（unlock() 前は null）
+export function getAudioContext(): AudioContext | null {
+  return ctx
+}
+
 function ready(): boolean {
   if (!ctx || !masterGain) return false
   // iOS Safari はバックグラウンド復帰などで再サスペンドすることがある
