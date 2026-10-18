@@ -12,7 +12,7 @@ export default function CTAOverlay({ resumed = false, mic, onEnableMic }: Props)
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 pointer-events-none">
-      <div className="flex flex-col items-center gap-2 animate-bounce">
+      <div className="flex flex-col items-center gap-2 motion-safe:animate-bounce">
         <p className="text-white text-lg font-bold tracking-wide drop-shadow-lg text-center px-4">
           {listening
             ? resumed

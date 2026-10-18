@@ -9,6 +9,7 @@ import GiftBoxes from './GiftBoxes'
 import Bunting from './Bunting'
 import Characters from './Characters'
 import { blowState, DARK_PAUSE_SEC, nowSec } from '../state/blowState'
+import { prefersReducedMotion } from '../lib/motion'
 
 const DARK_BG = new THREE.Color('#070504')
 const ROOM_BG = new THREE.Color('#1d1510')
@@ -61,6 +62,8 @@ function Lighting() {
 const TARGET = new THREE.Vector3(0, -0.45, 0)
 const FIT_WIDTH = 4.6
 const FIT_HEIGHT = 4.4
+// 動きを減らす設定ではカメラの漂いとマウス追従を止める
+const SWAY = prefersReducedMotion ? 0 : 1
 
 function CameraRig() {
   const { camera, size } = useThree()
@@ -94,8 +97,8 @@ function CameraRig() {
     }
 
     const t = state.clock.elapsedTime
-    const az = state.pointer.x * 0.07 + Math.sin(t * 0.13) * 0.035
-    const el = 0.3 + state.pointer.y * 0.03 + Math.sin(t * 0.17) * 0.012
+    const az = (state.pointer.x * 0.07 + Math.sin(t * 0.13) * 0.035) * SWAY
+    const el = 0.3 + (state.pointer.y * 0.03 + Math.sin(t * 0.17) * 0.012) * SWAY
     desired.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(dist).add(TARGET)
 
     cam.position.lerp(desired, 1 - Math.exp(-dt * 2.5))

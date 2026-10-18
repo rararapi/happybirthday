@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { GiftShadow, TABLE_TOP_Y } from './Table'
 import { blowState, DARK_PAUSE_SEC, nowSec } from '../state/blowState'
 import * as audio from '../audio/audioManager'
+import { prefersReducedMotion } from '../lib/motion'
 
 type Kind = 'bear' | 'rabbit' | 'chick'
 
@@ -37,6 +38,8 @@ const CYCLE_SEC = 7
 const CLAP_CYCLES = 4
 /** タップでジャンプして1回転する時間（秒） */
 const TAP_SEC = 0.7
+/** 動きを減らす設定では体の揺れと登場ジャンプを小さくする */
+const SWAY = prefersReducedMotion ? 0.3 : 1
 
 const HEAD_Y = 0.56
 const SHOULDER: [number, number, number] = [0.17, 0.34, 0.1]
@@ -251,7 +254,7 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
     if (since >= 0) {
       const k = Math.min(since / APPEAR_SEC, 1)
       a.scale = backOut(k)
-      hop = Math.sin(k * Math.PI) * 0.25
+      hop = Math.sin(k * Math.PI) * 0.25 * SWAY
     } else {
       a.scale = THREE.MathUtils.damp(a.scale, 0, 10, dt)
       if (a.soundCycle >= 0) {
@@ -296,9 +299,9 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
     // s = 1 で手が合わさる。累乗で「パチッ」と素早く閉じる
     const s = Math.pow(0.5 - 0.5 * Math.cos(2 * Math.PI * cfg.rate * Math.max(inCycle, 0)), 1.5)
 
-    body.position.y = w * s * 0.015 + (1 - w) * Math.abs(Math.sin(t * 3.2 + cfg.delay * 4)) * 0.03
-    body.rotation.z = (1 - w) * Math.sin(t * 1.6 + cfg.delay * 4) * 0.08
-    head.rotation.z = Math.sin(t * 2.1 + cfg.delay * 5) * 0.1
+    body.position.y = w * s * 0.015 + (1 - w) * Math.abs(Math.sin(t * 3.2 + cfg.delay * 4)) * 0.03 * SWAY
+    body.rotation.z = (1 - w) * Math.sin(t * 1.6 + cfg.delay * 4) * 0.08 * SWAY
+    head.rotation.z = Math.sin(t * 2.1 + cfg.delay * 5) * 0.1 * SWAY
     head.rotation.x = -w * s * 0.08
 
     for (let side = 0; side < 2; side++) {
