@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GiftShadow, TABLE_TOP_Y } from './Table'
@@ -31,24 +31,15 @@ const CHARACTERS: CharacterConfig[] = [
 ]
 
 const APPEAR_SEC = 0.55
-/** 1回の拍手の長さ（秒）。CYCLE_SEC ごとに繰り返し、合間はバンザイで揺れる */
+/** 1回の拍手の長さ（秒）。CYCLE_SEC ごとに CLAP_CYCLES 回繰り返し、合間とその後はバンザイで揺れる */
 const CLAP_SEC = 3.6
 const CYCLE_SEC = 7
+const CLAP_CYCLES = 4
 /** タップでジャンプして1回転する時間（秒） */
 const TAP_SEC = 0.7
 
 const HEAD_Y = 0.56
 const SHOULDER: [number, number, number] = [0.17, 0.34, 0.1]
-
-// 最初の拍手の手が合わさる時刻（部屋の点灯からの秒）。拍手音をこれに合わせる
-export function applauseTimes(): number[] {
-  const times: number[] = []
-  for (const c of CHARACTERS) {
-    const start = c.delay + APPEAR_SEC
-    for (let k = 0; (k + 0.5) / c.rate < CLAP_SEC; k++) times.push(start + (k + 0.5) / c.rate)
-  }
-  return times
-}
 
 function backOut(k: number) {
   const s = 1.9
@@ -232,7 +223,8 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
   const setArm = (i: number) => (g: THREE.Group | null) => {
     if (g) armRefs.current[i] = g
   }
-  const anim = useRef({ scale: 0, clap: 0, tapAt: -1 })
+  const anim = useRef({ scale: 0, clap: 0, tapAt: -1, soundCycle: -1 })
+  const applauseCancelRef = useRef<(() => void) | null>(null)
 
   const hr = cfg.kind === 'chick' ? 0.17 : 0.2
   const paw = cfg.kind === 'bear' ? m.accent : m.fur
@@ -243,6 +235,8 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
       if ((o as THREE.Mesh).isMesh) o.castShadow = castShadows
     })
   }, [castShadows])
+
+  useEffect(() => () => applauseCancelRef.current?.(), [])
 
   useFrame((state, dt) => {
     const root = rootRef.current
@@ -260,6 +254,11 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
       hop = Math.sin(k * Math.PI) * 0.25
     } else {
       a.scale = THREE.MathUtils.damp(a.scale, 0, 10, dt)
+      if (a.soundCycle >= 0) {
+        applauseCancelRef.current?.()
+        applauseCancelRef.current = null
+        a.soundCycle = -1
+      }
     }
     const visible = a.scale > 0.002
     root.visible = visible
@@ -277,7 +276,21 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
     root.rotation.y = spin * Math.PI * 2
 
     const t = state.clock.elapsedTime
-    const inCycle = since - APPEAR_SEC >= 0 ? (since - APPEAR_SEC) % CYCLE_SEC : -1
+    const clapTime = since - APPEAR_SEC
+    const cycle = clapTime >= 0 ? Math.floor(clapTime / CYCLE_SEC) : -1
+    const inCycle = cycle >= 0 && cycle < CLAP_CYCLES ? clapTime - cycle * CYCLE_SEC : -1
+
+    // 拍手の始まりに、この回の手が合わさる時刻へ拍手音を予約する（2回目以降は控えめ）
+    if (inCycle >= 0 && inCycle < CLAP_SEC && cycle !== a.soundCycle) {
+      a.soundCycle = cycle
+      const times: number[] = []
+      for (let k = 0; (k + 0.5) / cfg.rate < CLAP_SEC; k++) {
+        const t = (k + 0.5) / cfg.rate - inCycle
+        if (t > 0) times.push(t)
+      }
+      applauseCancelRef.current?.()
+      applauseCancelRef.current = audio.playApplause(times, cycle === 0 ? 1 : 0.6)
+    }
     a.clap = THREE.MathUtils.damp(a.clap, inCycle >= 0 && inCycle < CLAP_SEC ? 1 : 0, 8, dt)
     const w = a.clap
     // s = 1 で手が合わさる。累乗で「パチッ」と素早く閉じる

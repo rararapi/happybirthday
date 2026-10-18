@@ -34,7 +34,7 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 - `src/components/BirthdayCake.tsx` - Procedural cake (lathe tiers, piping, strawberries, plate) and candle placement.
 - `src/components/Candles.tsx` - Instanced candles, shader flames, glow halos, embers, smoke, and the aggregated candle light.
 - `src/components/Balloons.tsx` - 3D balloons.
-- `src/components/Characters.tsx` - Procedural plush characters (bear, rabbit, chick) that pop in when the room lights come on and clap; `applauseTimes()` syncs the synthesized applause to their claps.
+- `src/components/Characters.tsx` - Procedural plush characters (bear, rabbit, chick) that pop in when the room lights come on and clap; each character schedules synthesized applause matched to its own claps (4 rounds, later rounds quieter).
 - `src/components/Table.tsx` - Tablecloth and blob shadows.
 - `src/components/CTAOverlay.tsx` - Initial instruction overlay.
 - `src/components/MessageCard.tsx` - Final birthday message.

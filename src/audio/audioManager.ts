@@ -326,14 +326,14 @@ export function playMelody(): () => void {
   }
 }
 
-// キャラクターの拍手「パチパチ」。times は今からの各拍手の時刻（秒）。キャンセル関数を返す
-export function playApplause(times: number[]): () => void {
+// キャラクターの拍手「パチパチ」。times は今からの各拍手の時刻（秒）、level は音量の倍率。キャンセル関数を返す
+export function playApplause(times: number[], level = 1): () => void {
   if (!ready() || !ctx || !masterGain) return () => {}
   const audio = ctx
   const now = audio.currentTime
 
   const bus = audio.createGain()
-  bus.gain.value = 0.5
+  bus.gain.value = 0.5 * level
   bus.connect(masterGain)
 
   const nodes: Array<AudioBufferSourceNode> = []
