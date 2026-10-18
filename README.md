@@ -1,24 +1,59 @@
-# Birthday Celebration Website
+# Happy Birthday 🎂
 
-This project is a simple and interactive website designed to celebrate someone's birthday. It includes animated text and images for a festive experience.
+ろうそくを吹き消してお祝いする、3D の誕生日メッセージサイトです。
+URL に名前と年齢を入れて送ると、その人のためのケーキが表示されます。
 
-## Setup
+公開先: https://rararapi.github.io/happybirthday/
 
-To run this project locally, follow these steps:
+## 遊び方
 
-1. Clone or download this repository.
-2. Navigate to the directory containing the cloned repository.
-3. Start a web server and open `index.html` in your browser.
+1. ろうそくの灯りだけの暗い部屋に、ケーキが置かれています。
+2. 画面を長押しすると「ふーっ」と息がかかり、手前のろうそくから順に消えていきます。途中で指を離しても、続きから吹き消せます。
+3. 全部消えると少し暗転したあと部屋の明かりが点き、紙吹雪・オルゴールの Happy Birthday とともに、くま・うさぎ・ひよこが登場して拍手します。
+4. 名前と年齢入りのメッセージカードが表示されます。「もう一度」でろうそくに火が戻ります。
 
-## Usage
+風船はタップすると割れます。右上のボタンでミュートできます。
 
-To customize the display of the website, you can output the name using methods other than ?name=YOUR_NAME in the URL query parameter. Additionally, you can encrypt the name by visiting http://localhost:8000/encrypt/, paste the encrypted value into ?n_cnt= in the URL, achieving the same result.
+## URL パラメータ
 
-### For example:
+| パラメータ | 内容 | 例 |
+|---|---|---|
+| `name` | 名前（そのまま表示） | `?name=Taro` |
+| `n_enc` / `n_cnt` | 暗号化した名前（URL から名前が直接読めないようにする） | `?n_enc=xxxx` |
+| `age` | 年齢。ろうそくの本数になる（1〜200） | `?age=20` |
 
-- http://localhost:8000/index.html?name=John
-- http://localhost:8000/index.html?n_cnt=encrypted_value
+組み合わせ例: `https://rararapi.github.io/happybirthday/?name=Taro&age=20`
 
-## Contribution
+暗号化した名前や URL は [`/encrypt/`](https://rararapi.github.io/happybirthday/encrypt/) のページで作れます。
+暗号化は名前を URL に平文で出さないための目くらまし程度で、鍵はソースに含まれています。
 
-This project is open source and contributions for improvement are welcome. Suggestions for new features, bug reports, and pull requests are always appreciated.
+## 開発
+
+Vite + React + TypeScript + React Three Fiber（three.js）+ Tailwind CSS で作っています。
+効果音・音楽はすべて Web Audio API で合成しており、音声ファイルは使っていません。
+
+```bash
+npm install
+npm run dev     # 開発サーバー（http://localhost:5173/happybirthday/）
+npm run build   # 本番ビルド（dist/ に出力。encrypt/ も dist/encrypt/ にコピー）
+```
+
+`main` ブランチに push すると GitHub Actions が GitHub Pages にデプロイします。
+
+### 主なファイル
+
+| パス | 役割 |
+|---|---|
+| `src/App.tsx` | 長押し操作と演出のタイムライン |
+| `src/state/blowState.ts` | 毎フレーム変わる演出値（消火の進み具合・部屋の明るさなど） |
+| `src/components/Scene.tsx` | ライティング・カメラ・背景 |
+| `src/components/BirthdayCake.tsx` | ケーキとろうそくの配置 |
+| `src/components/Candles.tsx` | ろうそく・炎・煙（インスタンス描画で 200 本でも軽量） |
+| `src/components/Characters.tsx` | 拍手するキャラクター |
+| `src/audio/audioManager.ts` | 効果音・メロディの合成 |
+| `src/hooks/useGiftName.ts` | 名前パラメータの読み取りと復号 |
+| `encrypt/` | URL 作成ページ |
+
+## ライセンス
+
+[MIT](LICENSE)
