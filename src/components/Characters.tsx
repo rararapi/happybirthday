@@ -123,6 +123,58 @@ function Face({ kind, hr, m }: { kind: Kind; hr: number; m: Materials }) {
   )
 }
 
+let stripeTexture: THREE.CanvasTexture | null = null
+
+// パーティー帽のしま模様（白地に色を乗せる前提でグレースケール）
+function getStripeTexture() {
+  if (!stripeTexture) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 8
+    canvas.height = 64
+    const g = canvas.getContext('2d')!
+    for (let i = 0; i < 8; i++) {
+      g.fillStyle = i % 2 ? '#ffffff' : '#9a9a9a'
+      g.fillRect(0, i * 8, 8, 8)
+    }
+    stripeTexture = new THREE.CanvasTexture(canvas)
+    stripeTexture.colorSpace = THREE.SRGBColorSpace
+  }
+  return stripeTexture
+}
+
+function PartyHat({ hr, color, pompom }: { hr: number; color: string; pompom: string }) {
+  const h = 0.2
+  return (
+    <group position={[0.04, hr * 0.9, 0]} rotation={[0, 0, -0.28]}>
+      <mesh position={[0, h / 2, 0]}>
+        <coneGeometry args={[0.085, h, 20, 1, true]} />
+        <meshStandardMaterial color={color} map={getStripeTexture()} roughness={0.6} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0, h + 0.012, 0]}>
+        <sphereGeometry args={[0.028, 10, 8]} />
+        <meshStandardMaterial color={pompom} roughness={0.9} />
+      </mesh>
+    </group>
+  )
+}
+
+function Bow({ hr, color }: { hr: number; color: string }) {
+  return (
+    <group position={[0.1, hr * 0.78, 0.07]} rotation={[0.2, 0, -0.35]}>
+      {[-1, 1].map((s) => (
+        <mesh key={s} position={[s * 0.035, 0, 0]} rotation={[0, 0, s * 0.3]} scale={[1.4, 0.8, 0.6]}>
+          <sphereGeometry args={[0.03, 10, 8]} />
+          <meshStandardMaterial color={color} roughness={0.45} />
+        </mesh>
+      ))}
+      <mesh>
+        <sphereGeometry args={[0.018, 8, 6]} />
+        <meshStandardMaterial color={color} roughness={0.45} />
+      </mesh>
+    </group>
+  )
+}
+
 function Ears({ kind, hr, m }: { kind: Kind; hr: number; m: Materials }) {
   if (kind === 'bear') {
     return (
@@ -316,6 +368,9 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
               <sphereGeometry args={[hr, 24, 18]} />
             </mesh>
             <Ears kind={cfg.kind} hr={hr} m={m} />
+            {cfg.kind === 'bear' && <PartyHat hr={hr} color="#ff6b6b" pompom="#fdcb6e" />}
+            {cfg.kind === 'chick' && <PartyHat hr={hr} color="#4ecdc4" pompom="#ff85c0" />}
+            {cfg.kind === 'rabbit' && <Bow hr={hr} color="#ff85c0" />}
             <Face kind={cfg.kind} hr={hr} m={m} />
           </group>
         </group>
