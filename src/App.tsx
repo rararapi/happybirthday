@@ -102,7 +102,10 @@ export default function App() {
       applauseCancelRef.current = audio.playApplause(applauseTimes())
       fireConfetti()
     })
-    later(MESSAGE_DELAY_MS, () => changeState('celebrated'))
+    later(MESSAGE_DELAY_MS, () => {
+      blowState.card = true
+      changeState('celebrated')
+    })
   }, [changeState, fireConfetti, later, stopMic, stopWindSound])
 
   // 長押しとマイクの両方から吹く強さを求め、消火の進み具合を進める
@@ -210,6 +213,7 @@ export default function App() {
     cancelRelight()
     audio.playRelight()
     blowState.blownAt = -1
+    blowState.card = false
     progressRef.current = 0
     setProgress(0)
     changeState('idle')

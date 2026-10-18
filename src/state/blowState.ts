@@ -11,6 +11,10 @@ export const blowState = {
   blownAt: -1,
   /** 部屋の明かり 0 → 1（Scene が blownAt から平滑化して更新） */
   room: 0,
+  /** メッセージカードを表示中か（App が設定） */
+  card: false,
+  /** カード分の画面ずらし 0 → 1（CameraRig が card から平滑化して更新） */
+  cardMix: 0,
 }
 
 /** 消灯から部屋の明かりが点くまでの暗転時間（秒） */

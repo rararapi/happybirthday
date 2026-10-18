@@ -78,8 +78,20 @@ function CameraRig() {
     const vHalf = THREE.MathUtils.degToRad(fov / 2)
     const hHalf = Math.atan(Math.tan(vHalf) * aspect)
     let dist = Math.max(FIT_HEIGHT / 2 / Math.tan(vHalf), FIT_WIDTH / 2 / Math.tan(hHalf))
-    // 吹いている間は少し寄る。部屋が明るくなったら少し引く
-    dist *= 1 - 0.07 * blowState.blow + 0.05 * blowState.room
+    // 吹いている間は少し寄る。部屋が明るくなったら少し引く。カード表示中はさらに引く
+    blowState.cardMix = THREE.MathUtils.damp(blowState.cardMix, blowState.card ? 1 : 0, 2.5, dt)
+    const card = blowState.cardMix
+    dist *= (1 - 0.07 * blowState.blow + 0.05 * blowState.room) * (1 + 0.2 * card)
+
+    // カードに隠れないよう、描画範囲をずらしてケーキを空いている側へ寄せる（縦長は上、横長は左）
+    if (card > 0.001) {
+      const portrait = aspect < 1
+      const offX = portrait ? 0 : size.width * 0.2 * card
+      const offY = portrait ? size.height * 0.22 * card : 0
+      cam.setViewOffset(size.width, size.height, offX, offY, size.width, size.height)
+    } else if (cam.view?.enabled) {
+      cam.clearViewOffset()
+    }
 
     const t = state.clock.elapsedTime
     const az = state.pointer.x * 0.07 + Math.sin(t * 0.13) * 0.035

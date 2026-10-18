@@ -26,12 +26,13 @@ export default function MessageCard({ name, age, onReplay }: Props) {
   }
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
+    <div className="absolute inset-0 flex justify-center p-5 pointer-events-none portrait:items-end portrait:pb-8 landscape:items-center landscape:justify-end landscape:pr-[6vw]">
       <div
         className="w-full max-w-sm rounded-3xl p-6 text-center animate-fade-in pointer-events-auto"
         onPointerDown={(e) => e.stopPropagation()}
         style={{
-          background: 'rgba(255, 255, 255, 0.08)',
+          // 明るくなった部屋（白いテーブルクロス）の上でも文字が読めるよう暗めのガラスにする
+          background: 'rgba(24, 16, 12, 0.55)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
