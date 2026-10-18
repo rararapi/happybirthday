@@ -370,3 +370,23 @@ export function playApplause(times: number[]): () => void {
     bus.disconnect()
   }
 }
+
+// キャラクターをタップしたときの「ピュイッ」。pitch で声の高さを変える
+export function playSqueak(pitch = 1) {
+  if (!ready() || !ctx || !masterGain) return
+  const audio = ctx
+  const now = audio.currentTime
+
+  const osc = audio.createOscillator()
+  osc.type = 'triangle'
+  osc.frequency.setValueAtTime(600 * pitch, now)
+  osc.frequency.exponentialRampToValueAtTime(1300 * pitch, now + 0.06)
+  osc.frequency.exponentialRampToValueAtTime(900 * pitch, now + 0.16)
+  const gain = audio.createGain()
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.linearRampToValueAtTime(0.16, now + 0.012)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2)
+  osc.connect(gain).connect(masterGain)
+  osc.start(now)
+  osc.stop(now + 0.22)
+}

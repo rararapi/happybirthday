@@ -1,8 +1,9 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GiftShadow, TABLE_TOP_Y } from './Table'
 import { blowState, DARK_PAUSE_SEC, nowSec } from '../state/blowState'
+import * as audio from '../audio/audioManager'
 
 type Kind = 'bear' | 'rabbit' | 'chick'
 
@@ -18,19 +19,23 @@ interface CharacterConfig {
   delay: number
   /** 拍手の速さ（回/秒） */
   rate: number
+  /** タップしたときの鳴き声の高さ */
+  voice: number
 }
 
 // ケーキ皿の外側、プレゼント箱の間に立つ
 const CHARACTERS: CharacterConfig[] = [
-  { kind: 'bear', x: -1.9, z: -0.15, rotY: 0.35, scale: 1.1, color: '#b07a52', accent: '#f1d3b3', delay: 0, rate: 3.1 },
-  { kind: 'rabbit', x: 1.9, z: -0.2, rotY: -0.35, scale: 1.0, color: '#f6efe8', accent: '#ffb7c5', delay: 0.15, rate: 3.4 },
-  { kind: 'chick', x: -0.7, z: 2.0, rotY: 0.15, scale: 0.75, color: '#ffd84d', accent: '#ff9f43', delay: 0.3, rate: 3.8 },
+  { kind: 'bear', x: -1.9, z: -0.15, rotY: 0.35, scale: 1.1, color: '#b07a52', accent: '#f1d3b3', delay: 0, rate: 3.1, voice: 0.85 },
+  { kind: 'rabbit', x: 1.9, z: -0.2, rotY: -0.35, scale: 1.0, color: '#f6efe8', accent: '#ffb7c5', delay: 0.15, rate: 3.4, voice: 1.2 },
+  { kind: 'chick', x: -0.7, z: 2.0, rotY: 0.15, scale: 0.75, color: '#ffd84d', accent: '#ff9f43', delay: 0.3, rate: 3.8, voice: 1.6 },
 ]
 
 const APPEAR_SEC = 0.55
 /** 1回の拍手の長さ（秒）。CYCLE_SEC ごとに繰り返し、合間はバンザイで揺れる */
 const CLAP_SEC = 3.6
 const CYCLE_SEC = 7
+/** タップでジャンプして1回転する時間（秒） */
+const TAP_SEC = 0.7
 
 const HEAD_Y = 0.56
 const SHOULDER: [number, number, number] = [0.17, 0.34, 0.1]
@@ -175,7 +180,7 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
   const setArm = (i: number) => (g: THREE.Group | null) => {
     if (g) armRefs.current[i] = g
   }
-  const anim = useRef({ scale: 0, clap: 0 })
+  const anim = useRef({ scale: 0, clap: 0, tapAt: -1 })
 
   const hr = cfg.kind === 'chick' ? 0.17 : 0.2
   const paw = cfg.kind === 'bear' ? m.accent : m.fur
@@ -212,7 +217,12 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
     }
     if (!visible) return
     root.scale.setScalar(cfg.scale * a.scale)
-    root.position.y = hop
+
+    // タップ: ぴょんと跳ねてくるっと1回転
+    const tk = a.tapAt < 0 ? 1 : Math.min((nowSec() - a.tapAt) / TAP_SEC, 1)
+    const spin = tk < 1 ? tk * tk * (3 - 2 * tk) : 0
+    root.position.y = hop + Math.sin(tk * Math.PI) * 0.3 * (tk < 1 ? 1 : 0)
+    root.rotation.y = spin * Math.PI * 2
 
     const t = state.clock.elapsedTime
     const inCycle = since - APPEAR_SEC >= 0 ? (since - APPEAR_SEC) % CYCLE_SEC : -1
@@ -236,13 +246,26 @@ function Character({ cfg, castShadows }: { cfg: CharacterConfig; castShadows: bo
     }
   })
 
+  const handleTap = (e: ThreeEvent<PointerEvent>) => {
+    // 隠れている間は長押しの邪魔をしない
+    if (anim.current.scale < 0.5) return
+    // 3D内の伝播とDOMバブリングの両方を止める（長押し開始を防ぐ）
+    e.stopPropagation()
+    e.nativeEvent.stopPropagation()
+    const now = nowSec()
+    if (anim.current.tapAt >= 0 && now - anim.current.tapAt < TAP_SEC) return
+    audio.unlock()
+    audio.playSqueak(cfg.voice)
+    anim.current.tapAt = now
+  }
+
   return (
     <group position={[cfg.x, TABLE_TOP_Y, cfg.z]} rotation={[0, cfg.rotY, 0]}>
       <group ref={shadowRef} scale={0.001} visible={false}>
         <GiftShadow size={0.85 * cfg.scale} />
       </group>
 
-      <group ref={rootRef} scale={0.001} visible={false}>
+      <group ref={rootRef} scale={0.001} visible={false} onPointerDown={handleTap}>
         {/* 足 */}
         {[-1, 1].map((s) => (
           <mesh key={s} position={[s * 0.09, 0.03, 0.08]} scale={[1, 0.6, 1.3]} material={isChick ? m.beak : m.accent}>
