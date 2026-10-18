@@ -4,6 +4,7 @@ import { PerformanceMonitor } from '@react-three/drei'
 import * as THREE from 'three'
 import { useGiftName } from './hooks/useGiftName'
 import { useAgeParam } from './hooks/useAgeParam'
+import { useCardParams } from './hooks/useCardParams'
 import { useConfetti } from './hooks/useConfetti'
 import * as audio from './audio/audioManager'
 import { isMicSupported, startMicBlow, type MicBlow } from './audio/micBlow'
@@ -31,6 +32,7 @@ const MIC_SUPPORTED = isMicSupported()
 export default function App() {
   const name = useGiftName()
   const age = useAgeParam()
+  const { from, message } = useCardParams()
   const { fireConfetti } = useConfetti()
 
   const [appState, setAppState] = useState<AppState>('idle')
@@ -273,7 +275,7 @@ export default function App() {
 
       {appState === 'blowing' && <BlowProgress progress={progress} byMic={mic === 'on' && !pointerHeldRef.current} />}
 
-      {appState === 'celebrated' && <MessageCard name={name} age={age} onReplay={replay} />}
+      {appState === 'celebrated' && <MessageCard name={name} age={age} from={from} message={message} onReplay={replay} />}
     </div>
   )
 }

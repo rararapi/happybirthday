@@ -42,17 +42,24 @@ function generateURL() {
 
   const name = document.getElementById('name').value.trim()
   const ageRaw = document.getElementById('age').value.trim()
+  const from = document.getElementById('from').value.trim()
+  const msg = document.getElementById('msg').value.trim()
   const encrypt = document.getElementById('encryptName').checked
 
   const params = new URLSearchParams()
-
-  if (name) {
+  // 暗号化するときは平文用と別のキーで渡す
+  const setText = (plainKey, encKey, value) => {
+    if (!value) return
     if (encrypt) {
-      params.set('n_enc', encryptNameValue(name))
+      params.set(encKey, encryptNameValue(value))
     } else {
-      params.set('name', name)
+      params.set(plainKey, value)
     }
   }
+
+  setText('name', 'n_enc', name)
+  setText('from', 'f_enc', from)
+  setText('msg', 'm_enc', msg)
 
   if (ageRaw) {
     const age = Number(ageRaw)

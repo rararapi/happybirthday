@@ -73,7 +73,7 @@
             margin: 18px 0 6px;
         }
         label:first-of-type { margin-top: 0; }
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], textarea {
             width: 100%;
             padding: 10px 14px;
             font-size: 1rem;
@@ -83,7 +83,8 @@
             color: #f1f0f7;
             outline: none;
         }
-        input:focus { border-color: #ffd966; }
+        textarea { resize: vertical; font-family: inherit; line-height: 1.6; }
+        input:focus, textarea:focus { border-color: #ffd966; }
         .checkbox-row {
             display: flex;
             align-items: center;
@@ -162,8 +163,9 @@
             <h2>遊び方</h2>
             <ol>
                 <li>送られてきたURLを開くと、ろうそくの灯ったケーキが表示されます。</li>
-                <li><strong>画面を長押し</strong>すると、息を吹きかけるようにろうそくの火が小さくなっていきます。</li>
-                <li>火が消えると紙吹雪とメロディでお祝いされ、メッセージカードが表示されます。</li>
+                <li><strong>画面を長押し</strong>すると、息を吹きかけるようにろうそくの火が手前から消えていきます。<strong>「🎤 マイクで本当に吹き消す」</strong>を押せば、マイクに息を吹きかけて消すこともできます。</li>
+                <li>火が消えると部屋の明かりが点き、紙吹雪とメロディ、拍手するキャラクターたちがお祝いしてくれます。キャラクターはタップすると反応します。</li>
+                <li>最後に名前・年齢・メッセージ入りのカードが表示されます。</li>
                 <li>浮かんでいる<strong>風船はタップで割れます</strong>。しばらくすると戻ってきます。</li>
                 <li>メッセージカードの<strong>リプレイボタン</strong>でろうそくを灯し直して、もう一度遊べます。</li>
                 <li>右上のボタンで<strong>音のオン・オフ</strong>を切り替えられます。</li>
@@ -182,6 +184,14 @@
                     <td>暗号化された名前。URLを見ても名前が分からないようにしたいときに使います。下のフォームで生成できます。</td>
                 </tr>
                 <tr>
+                    <th><code>from</code></th>
+                    <td>送り主の名前（40文字まで）。カードに「from ○○」と表示されます。暗号化した場合は <code>f_enc</code>。</td>
+                </tr>
+                <tr>
+                    <th><code>msg</code></th>
+                    <td>カードに表示する自由なメッセージ（300文字まで・改行可）。省略すると標準の文面になります。暗号化した場合は <code>m_enc</code>。</td>
+                </tr>
+                <tr>
                     <th><code>age</code></th>
                     <td>年齢（1〜200の整数）。ケーキのろうそくの本数になります。<br>例: <code>?name=さくら&amp;age=7</code></td>
                 </tr>
@@ -198,9 +208,17 @@
             <input type="number" id="age" min="1" max="200" step="1" placeholder="例: 7">
             <p class="hint">空欄の場合は標準のろうそく配置になります。</p>
 
+            <label for="from">送り主の名前</label>
+            <input type="text" id="from" maxlength="40" placeholder="例: パパとママ" autocomplete="off">
+            <p class="hint">空欄の場合は表示されません。</p>
+
+            <label for="msg">メッセージ</label>
+            <textarea id="msg" rows="4" maxlength="300" placeholder="例: いつもありがとう。素敵な一年になりますように！"></textarea>
+            <p class="hint">空欄の場合は標準のメッセージになります（300文字まで）。</p>
+
             <div class="checkbox-row">
                 <input type="checkbox" id="encryptName" checked>
-                <label for="encryptName" style="margin:0; color:#f1f0f7;">名前を暗号化する（URLから名前が読めなくなります）</label>
+                <label for="encryptName" style="margin:0; color:#f1f0f7;">名前・送り主・メッセージを暗号化する（URLから内容が読めなくなります）</label>
             </div>
 
             <button type="button" class="primary" onclick="generateURL()">URLを生成</button>

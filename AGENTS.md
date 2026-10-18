@@ -12,6 +12,8 @@ The app supports these URL parameters for the recipient name:
 2. Encrypted value via `?n_enc=`
 3. Encrypted value via `?n_cnt=`
 
+Other parameters: `?age=` (candle count, 1-200), `?from=` / `?f_enc=` (sender), `?msg=` / `?m_enc=` (custom card message). Parsing lives in `src/lib/params.ts` as pure functions; the hooks only pass `window.location.search`.
+
 ## Commands
 
 - Install dependencies: `npm install`
@@ -36,7 +38,9 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 - `src/components/Table.tsx` - Tablecloth and blob shadows.
 - `src/components/CTAOverlay.tsx` - Initial instruction overlay.
 - `src/components/MessageCard.tsx` - Final birthday message.
-- `src/hooks/useGiftName.ts` - URL name parsing and decryption.
+- `src/lib/params.ts` - URL parameter parsing and decryption (pure functions).
+- `src/hooks/useGiftName.ts`, `useAgeParam.ts`, `useCardParams.ts` - Thin hooks over `params.ts`.
+- `src/audio/micBlow.ts` - Opt-in microphone blow detection feeding the same progress loop as the long press.
 - `src/hooks/useConfetti.ts` - Confetti trigger.
 - `src/data/messages.ts` - Birthday message text.
 
@@ -57,7 +61,7 @@ Run `npm run build` before committing UI, TypeScript, or dependency changes.
 ## Agent Rules
 
 - Keep the GitHub Pages base path as `/happybirthday/`.
-- Preserve support for `?name=`, `?n_enc=`, and `?n_cnt=`.
+- Preserve support for `?name=`, `?n_enc=`, `?n_cnt=`, `?age=`, `?from=`, `?f_enc=`, `?msg=`, and `?m_enc=`.
 - Do not reintroduce the old DOM implementation files: `script.js`, `style.css`, `three-scene.js`, or `birthday-cake.png`.
 - Avoid adding postprocessing bloom unless black rendering issues are explicitly re-tested.
 - Glow is faked with additive halo sprites in `Candles.tsx`; keep candle rendering instanced so `?age=200` stays fast on phones.

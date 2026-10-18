@@ -4,10 +4,14 @@ import { birthdayMessage } from '../data/messages'
 interface Props {
   name: string
   age: number | null
+  /** 送り主の名前（空なら非表示） */
+  from: string
+  /** 自由メッセージ（空なら既定の文面） */
+  message: string
   onReplay: () => void
 }
 
-export default function MessageCard({ name, age, onReplay }: Props) {
+export default function MessageCard({ name, age, from, message, onReplay }: Props) {
   const [copied, setCopied] = useState(false)
 
   const handleShare = async () => {
@@ -53,9 +57,12 @@ export default function MessageCard({ name, age, onReplay }: Props) {
           <p className="text-base text-white/80 mb-2">🎉 {age}さい おめでとう!</p>
         )}
 
-        <p className="text-white/70 text-sm mt-5 leading-relaxed px-2">
-          {birthdayMessage}
+        <p className="text-white/70 text-sm mt-5 leading-relaxed px-2 whitespace-pre-line break-words">
+          {message || birthdayMessage}
         </p>
+        {from && (
+          <p className="text-white/60 text-sm mt-3 px-2 text-right break-words">from {from}</p>
+        )}
 
         <div className="flex justify-center gap-3 mt-6">
           <button
