@@ -37,10 +37,11 @@ Vite + React + TypeScript + React Three Fiber（three.js）+ Tailwind CSS で作
 ```bash
 npm install
 npm run dev     # 開発サーバー（http://localhost:5173/happybirthday/）
+npm test        # テスト（Vitest）
 npm run build   # 本番ビルド（dist/ に出力。encrypt/ も dist/encrypt/ にコピー）
 ```
 
-`main` ブランチに push すると GitHub Actions が GitHub Pages にデプロイします。
+`main` ブランチに push すると GitHub Actions がテストとビルドを行い、GitHub Pages にデプロイします。
 
 ### 主なファイル
 

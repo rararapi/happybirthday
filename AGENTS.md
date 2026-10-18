@@ -18,9 +18,10 @@ Other parameters: `?age=` (candle count, 1-200), `?from=` / `?f_enc=` (sender), 
 
 - Install dependencies: `npm install`
 - Start dev server: `npm run dev`
+- Run tests: `npm test` (Vitest; URL parameter parsing in `src/lib/params.test.ts`)
 - Build for production: `npm run build`
 
-Run `npm run build` before committing UI, TypeScript, or dependency changes.
+Run `npm test` and `npm run build` before committing UI, TypeScript, or dependency changes. CI runs both before deploying.
 
 ## Architecture
 
